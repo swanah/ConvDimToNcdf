@@ -15,7 +15,7 @@ public enum DataVersionNumbers {
     v2_0("2.0"), v2_1("2.1"), v2_2("2.2"), 
     v3_0("3.0"), v3_1("3.1"), 
     v4_0("4.0"), v4_1("4.1"), v4_2("4.2"), v4_21("4.21"), v4_21u("4.21u"), v4_3("4.3"),
-    vSyn1_0("1.0");
+    vSyn1_0("Syn1.0");
     
     public String versionString;
 

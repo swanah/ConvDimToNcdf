@@ -93,6 +93,7 @@ public class ConvDimToNcdf {
                         case v4_21u:
                         case v4_21:
                         case v4_3: 
+                        case vSyn1_0: 
                             pSinConvL2.convert(p, l2NetcdfName, version);
                             gridder.binToGridV4(p, version);
                             break;
@@ -163,15 +164,17 @@ public class ConvDimToNcdf {
         //ATS_TOA_1P  RUPA200801  01_064007_  0000652720  64_00406_3  0520_9956.N1.gz
         File f = new File(fname);
         String stmp = f.getName();
+        String yyyymmdd = stmp.substring(14, 14+8);
+        String hhmmss = stmp.substring(14+8+1, 14+8+1+6);
         String instrument = "AATSR_ENVISAT";
         if (stmp.startsWith("AT2")){
             instrument = "ATSR2_ERS2";
         }
         if (version.equals(DataVersionNumbers.vSyn1_0)){
-            instrument = "MERIS-AATSR-SYN_ENVISAT";
+            instrument = "MERIS_AATSR_SYN_ENVISAT";
+            yyyymmdd = stmp.substring(12, 12+8);
+            hhmmss = stmp.substring(12+8+1, 12+8+1+6);
         }
-        String yyyymmdd = stmp.substring(14, 14+8);
-        String hhmmss = stmp.substring(14+8+1, 14+8+1+6);
         String l3NetcdfName = yyyymmdd;
         if (lv3SingleOrbit) l3NetcdfName += hhmmss;
         l3NetcdfName += "-ESACCI-L3C_AEROSOL-AER_PRODUCTS-" + instrument + "-SU_DAILY-v" + version + ".nc";
@@ -185,16 +188,19 @@ public class ConvDimToNcdf {
         //ATS_TOA_1P  RUPA200801  01_064007_  0000652720  64_00406_3  0520_9956.N1.gz
         File f = new File(fname);
         String stmp = f.getName();
+        String yyyymmdd = stmp.substring(14, 14+8);
+        String hhmmss = stmp.substring(14+8+1, 14+8+1+6);
+        String orbit = (version.isGE(DataVersionNumbers.v4_0) && stmp.length() > 49) ? stmp.substring(49, 49+5) : "00000";
         String instrument = "AATSR_ENVISAT";
         if (stmp.startsWith("AT2")){
             instrument = "ATSR2_ERS2";
         }
         if (version.equals(DataVersionNumbers.vSyn1_0)){
-            instrument = "MERIS-AATSR-SYN_ENVISAT";
+            instrument = "MERIS_AATSR_SYN_ENVISAT";
+            yyyymmdd = stmp.substring(12, 12+8);
+            hhmmss = stmp.substring(12+8+1, 12+8+1+6);
+            orbit = "00000";
         }
-        String yyyymmdd = stmp.substring(14, 14+8);
-        String hhmmss = stmp.substring(14+8+1, 14+8+1+6);
-        String orbit = (version.isGE(DataVersionNumbers.v4_0) && stmp.length() > 49) ? stmp.substring(49, 49+5) : "00000";
         String l2NetcdfName = yyyymmdd + hhmmss + "-ESACCI-L2P_AEROSOL-AER_PRODUCTS-" + instrument + "-SU_" + orbit + "-v" + version + ".nc";
         f = new File(f.getParentFile(), l2NetcdfName);
         l2NetcdfName = f.getPath();

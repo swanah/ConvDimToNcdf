@@ -35,6 +35,8 @@ import ucar.nc2.Variable;
 class ProdSinConverterL2 extends BasicConverter {
     public static ProdSinConverterL2 instance = null;
     private SinProduct sinP;
+    private boolean doSyn;
+    private boolean doSurfRefl;
     
     private final NetcdfVariableProperties pixV = 
             new NetcdfVariableProperties("pixel_number", "Sinusoidal pixel index", "", "1", DataType.INT, 0, 0, null);
@@ -151,6 +153,8 @@ class ProdSinConverterL2 extends BasicConverter {
         //viewV.flagMeanings = "nadir forward";
         landFlagV.flagValues = Array.factory(new int[]{0,1});
         landFlagV.flagMeanings = "sea land";
+        doSyn = false;
+        doSurfRefl = true;
     }
 
     static synchronized ProdSinConverterL2 getInstance() {
@@ -169,6 +173,8 @@ class ProdSinConverterL2 extends BasicConverter {
         String fname = p.getFileLocation().getPath();
         System.out.println("processing V" + version + " - " + fname);
         sinP = new SinProduct(sinBandNames, p);
+        doSyn = version.equals(DataVersionNumbers.vSyn1_0);
+        doSurfRefl = p.containsBand("reflec_surf_nadir_0550_1");
         binProductToSin(p, sinP);
         sinP.convCellsToArray();
         writeNcdf(ncdfName, sinP, version);
@@ -216,11 +222,12 @@ class ProdSinConverterL2 extends BasicConverter {
             createVcdfVar(ncfile4, absAodV, pixList);
             createVcdfVar(ncfile4, ssaV, pixList);
             
-            createVcdfVar(ncfile4, sreflec550V, pixList);
-            createVcdfVar(ncfile4, sreflec670V, pixList);
-            createVcdfVar(ncfile4, sreflec870V, pixList);
-            createVcdfVar(ncfile4, sreflec1600V, pixList);
-            
+            if (doSurfRefl){
+                createVcdfVar(ncfile4, sreflec550V, pixList);
+                createVcdfVar(ncfile4, sreflec670V, pixList);
+                createVcdfVar(ncfile4, sreflec870V, pixList);
+                createVcdfVar(ncfile4, sreflec1600V, pixList);
+            }
             createVcdfVar(ncfile4, sigAod550V, pixList);
             createVcdfVar(ncfile4, sigAod670V, pixList);
             createVcdfVar(ncfile4, sigAod870V, pixList);
@@ -271,6 +278,12 @@ class ProdSinConverterL2 extends BasicConverter {
         if (atsr2) {
             ncfile.addGroupAttribute(null, new Attribute("sensor", "ATSR2"));
             ncfile.addGroupAttribute(null, new Attribute("platform", "ERS2"));
+        }
+        else if (doSyn){
+            String[] s = new String[]{"MERIS","AATSR"};
+            Array a = Array.makeArray(DataType.STRING, s);
+            ncfile.addGroupAttribute(null, new Attribute("sensor", a));
+            ncfile.addGroupAttribute(null, new Attribute("platform", "ENVISAT"));
         }
         else {
             ncfile.addGroupAttribute(null, new Attribute("sensor", "AATSR"));
@@ -382,16 +395,34 @@ class ProdSinConverterL2 extends BasicConverter {
             TiePointGrid latTpg = p.getTiePointGrid("latitude");
             TiePointGrid lonTpg = p.getTiePointGrid("longitude");
             
-            TiePointGrid seaNadTpg = p.getTiePointGrid("sun_elev_nadir");
-            TiePointGrid saaNadTpg = p.getTiePointGrid("sun_azimuth_nadir");
-            TiePointGrid veaNadTpg = p.getTiePointGrid("view_elev_nadir");
-            TiePointGrid vaaNadTpg = p.getTiePointGrid("view_elev_nadir");
-            
-            TiePointGrid seaFwdTpg = p.getTiePointGrid("sun_elev_fward");
-            TiePointGrid saaFwdTpg = p.getTiePointGrid("sun_azimuth_fward");
-            TiePointGrid veaFwdTpg = p.getTiePointGrid("view_elev_fward");
-            TiePointGrid vaaFwdTpg = p.getTiePointGrid("view_elev_fward");
+            TiePointGrid seaNadTpg = null;
+            TiePointGrid saaNadTpg = null;
+            TiePointGrid veaNadTpg = null;
+            TiePointGrid vaaNadTpg = null;
 
+            TiePointGrid seaFwdTpg = null;
+            TiePointGrid saaFwdTpg = null;
+            TiePointGrid veaFwdTpg = null;
+            TiePointGrid vaaFwdTpg = null;
+            
+            if (doSyn){
+                seaNadTpg = p.getTiePointGrid("sun_zenith");
+                saaNadTpg = p.getTiePointGrid("sun_azimuth");
+                veaNadTpg = p.getTiePointGrid("view_zenith");
+                vaaNadTpg = p.getTiePointGrid("view_azimuth");
+            }
+            else {
+                seaNadTpg = p.getTiePointGrid("sun_elev_nadir");
+                saaNadTpg = p.getTiePointGrid("sun_azimuth_nadir");
+                veaNadTpg = p.getTiePointGrid("view_elev_nadir");
+                vaaNadTpg = p.getTiePointGrid("view_azimuth_nadir");
+
+                seaFwdTpg = p.getTiePointGrid("sun_elev_fward");
+                saaFwdTpg = p.getTiePointGrid("sun_azimuth_fward");
+                veaFwdTpg = p.getTiePointGrid("view_elev_fward");
+                vaaFwdTpg = p.getTiePointGrid("view_azimuth_fward");
+            }
+            
             Band aotNdBand = p.getBand("aot_nd_2");
             Band aotUncNdBand = p.getBand("aot_brent_nd_1");
             Band fotB = p.getBand("frac_fine_total_1");
@@ -408,11 +439,17 @@ class ProdSinConverterL2 extends BasicConverter {
             Band sAot0870B = p.getBand("aot_nd_0870_1");
             Band sAot1600B = p.getBand("aot_nd_1600_1");
 
-            Band sref0555B = p.getBand("reflec_surf_nadir_0550_1");
-            Band sref0659B = p.getBand("reflec_surf_nadir_0670_1");
-            Band sref0865B = p.getBand("reflec_surf_nadir_0870_1");
-            Band sref1610B = p.getBand("reflec_surf_nadir_1600_1");
-
+            Band sref0555B = null;
+            Band sref0659B = null;
+            Band sref0865B = null;
+            Band sref1610B = null;
+            if (doSurfRefl){
+                sref0555B = p.getBand("reflec_surf_nadir_0550_1");
+                sref0659B = p.getBand("reflec_surf_nadir_0670_1");
+                sref0865B = p.getBand("reflec_surf_nadir_0870_1");
+                sref1610B = p.getBand("reflec_surf_nadir_1600_1");
+            }
+            
             float[] lat = new float[pWidth];
             float[] lon = new float[pWidth];
             float[] seaNad = new float[pWidth];
@@ -461,12 +498,13 @@ class ProdSinConverterL2 extends BasicConverter {
                 saaNadTpg.readPixels(0, iy, pWidth, 1, saaNad);
                 veaNadTpg.readPixels(0, iy, pWidth, 1, veaNad);
                 vaaNadTpg.readPixels(0, iy, pWidth, 1, vaaNad);
-                
-                seaFwdTpg.readPixels(0, iy, pWidth, 1, seaFwd);
-                saaFwdTpg.readPixels(0, iy, pWidth, 1, saaFwd);
-                veaFwdTpg.readPixels(0, iy, pWidth, 1, veaFwd);
-                vaaFwdTpg.readPixels(0, iy, pWidth, 1, vaaFwd);
-                
+                if (!doSyn){
+                    seaFwdTpg.readPixels(0, iy, pWidth, 1, seaFwd);
+                    saaFwdTpg.readPixels(0, iy, pWidth, 1, saaFwd);
+                    veaFwdTpg.readPixels(0, iy, pWidth, 1, veaFwd);
+                    vaaFwdTpg.readPixels(0, iy, pWidth, 1, vaaFwd);
+                }
+
                 aotNdBand.readPixels(0, iy, pWidth, 1, aotNd);
                 aotUncNdBand.readPixels(0, iy, pWidth, 1, aotUnc);
                 fotB.readPixels(0, iy, pWidth, 1, fineFrac);
@@ -481,10 +519,12 @@ class ProdSinConverterL2 extends BasicConverter {
                 sAot0870B.readPixels(0, iy, pWidth, 1, sAot0865);
                 sAot1600B.readPixels(0, iy, pWidth, 1, sAot1610);
 
-                sref0555B.readPixels(0, iy, pWidth, 1, sref0550);
-                sref0659B.readPixels(0, iy, pWidth, 1, sref0670);
-                sref0865B.readPixels(0, iy, pWidth, 1, sref0870);
-                sref1610B.readPixels(0, iy, pWidth, 1, sref1600);
+                if (doSurfRefl){
+                    sref0555B.readPixels(0, iy, pWidth, 1, sref0550);
+                    sref0659B.readPixels(0, iy, pWidth, 1, sref0670);
+                    sref0865B.readPixels(0, iy, pWidth, 1, sref0870);
+                    sref1610B.readPixels(0, iy, pWidth, 1, sref1600);
+                }
                 
                 cldFracB.readPixels(0, iy, pWidth, 1, cldFrac);
                 aotFlagsB.readPixels(0, iy, pWidth, 1, aotFlags);
@@ -515,8 +555,8 @@ class ProdSinConverterL2 extends BasicConverter {
                         vals[16] = aotUnc[ix] * sAot0659[ix] / aotNd[ix];
                         vals[17] = aotUnc[ix] * sAot0659[ix] / aotNd[ix];
                         
-                        vals[18] = (90.0f - seaNad[ix]);
-                        vals[19] = (90.0f - veaNad[ix]);
+                        vals[18] = (doSyn)?(seaNad[ix]):(90.0f - seaNad[ix]);
+                        vals[19] = (doSyn)?(seaNad[ix]):(90.0f - veaNad[ix]);
                         vals[20] = getRaz(saaNad[ix], vaaNad[ix]);
                         vals[21] = cldFrac[ix];
                         vals[22] = (aotFlags[ix] & 1);
@@ -563,10 +603,12 @@ class ProdSinConverterL2 extends BasicConverter {
             ncFile.write(absAodV.ncV,   Array.factory(sinP.bandsArr[8]));
             ncFile.write(ssaV.ncV,      Array.factory(sinP.bandsArr[9]));
             
-            ncFile.write(sreflec550V.ncV,  Array.factory(sinP.bandsArr[10]));
-            ncFile.write(sreflec670V.ncV,  Array.factory(sinP.bandsArr[11]));
-            ncFile.write(sreflec870V.ncV,  Array.factory(sinP.bandsArr[12]));
-            ncFile.write(sreflec1600V.ncV, Array.factory(sinP.bandsArr[13]));
+            if (doSurfRefl){
+                ncFile.write(sreflec550V.ncV,  Array.factory(sinP.bandsArr[10]));
+                ncFile.write(sreflec670V.ncV,  Array.factory(sinP.bandsArr[11]));
+                ncFile.write(sreflec870V.ncV,  Array.factory(sinP.bandsArr[12]));
+                ncFile.write(sreflec1600V.ncV, Array.factory(sinP.bandsArr[13]));
+            }
             
             ncFile.write(sigAod550V.ncV,  Array.factory(sinP.bandsArr[14]));
             ncFile.write(sigAod670V.ncV,  Array.factory(sinP.bandsArr[15]));

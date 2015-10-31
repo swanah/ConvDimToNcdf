@@ -37,6 +37,9 @@ public class ProdConverterL3 {
     //
     
     private static ProdConverterL3 instance = null;
+    
+    private static boolean doSyn;
+    private static boolean doSurfRefl;
 
     private final NetcdfVariableProperties latV = 
             new NetcdfVariableProperties("latitude", "latitude", "latitude", "degrees_north", DataType.FLOAT, -90f, 90f, null);
@@ -263,7 +266,8 @@ public class ProdConverterL3 {
     }
     
     public void writeGrids_V4(DataGridder gridder, String ncName, DataVersionNumbers version) throws IOException, InvalidRangeException {
-        
+        doSyn = gridder.isDoSyn();
+        doSurfRefl = gridder.isDoSurfRefl();
         final SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'", Locale.ENGLISH);
         df.setTimeZone(TimeZone.getTimeZone("UTC"));
         Map<String, String> prodInfo = new HashMap<String, String>(4);
@@ -316,15 +320,16 @@ public class ProdConverterL3 {
                         dF.setFloat(0, getMeanOrSdev(i, gridder.sigAod1600Grid, gridder.countGrid, origin[0], origin[1]));
                         ncdfFile.write(sigAod1600V[i].ncV, origin, dF);
 
-                        dF.setFloat(0, getMeanOrSdev(i, gridder.rsurf0555Grid, gridder.countGrid, origin[0], origin[1]));
-                        ncdfFile.write(sreflec555V[i].ncV, origin, dF);
-                        dF.setFloat(0, getMeanOrSdev(i, gridder.rsurf0659Grid, gridder.countGrid, origin[0], origin[1]));
-                        ncdfFile.write(sreflec659V[i].ncV, origin, dF);
-                        dF.setFloat(0, getMeanOrSdev(i, gridder.rsurf0865Grid, gridder.countGrid, origin[0], origin[1]));
-                        ncdfFile.write(sreflec865V[i].ncV, origin, dF);
-                        dF.setFloat(0, getMeanOrSdev(i, gridder.rsurf1600Grid, gridder.countGrid, origin[0], origin[1]));
-                        ncdfFile.write(sreflec1610V[i].ncV, origin, dF);
-
+                        if (doSurfRefl){
+                            dF.setFloat(0, getMeanOrSdev(i, gridder.rsurf0555Grid, gridder.countGrid, origin[0], origin[1]));
+                            ncdfFile.write(sreflec555V[i].ncV, origin, dF);
+                            dF.setFloat(0, getMeanOrSdev(i, gridder.rsurf0659Grid, gridder.countGrid, origin[0], origin[1]));
+                            ncdfFile.write(sreflec659V[i].ncV, origin, dF);
+                            dF.setFloat(0, getMeanOrSdev(i, gridder.rsurf0865Grid, gridder.countGrid, origin[0], origin[1]));
+                            ncdfFile.write(sreflec865V[i].ncV, origin, dF);
+                            dF.setFloat(0, getMeanOrSdev(i, gridder.rsurf1600Grid, gridder.countGrid, origin[0], origin[1]));
+                            ncdfFile.write(sreflec1610V[i].ncV, origin, dF);
+                        }
                         //dF.setFloat(0, getMeanOrSdev(i, gridder.angstrom659Grid, gridder.countGrid, origin[0], origin[1]));
                         //ncdfFile.write(angstrom659V[i].ncV, origin, dF);
                         dF.setFloat(0, getMeanOrSdev(i, gridder.angstrom865Grid, gridder.countGrid, origin[0], origin[1]));
@@ -534,15 +539,16 @@ public class ProdConverterL3 {
         createVcdfVar(ncfile, ssaV[0], latLonLst);
         createVcdfVar(ncfile, ssaV[1], latLonLst);
 
-        createVcdfVar(ncfile, sreflec555V[0], latLonLst);
-        createVcdfVar(ncfile, sreflec555V[1], latLonLst);
-        createVcdfVar(ncfile, sreflec659V[0], latLonLst);
-        createVcdfVar(ncfile, sreflec659V[1], latLonLst);
-        createVcdfVar(ncfile, sreflec865V[0], latLonLst);
-        createVcdfVar(ncfile, sreflec865V[1], latLonLst);
-        createVcdfVar(ncfile, sreflec1610V[0], latLonLst);
-        createVcdfVar(ncfile, sreflec1610V[1], latLonLst);
-
+        if (doSurfRefl){
+            createVcdfVar(ncfile, sreflec555V[0], latLonLst);
+            createVcdfVar(ncfile, sreflec555V[1], latLonLst);
+            createVcdfVar(ncfile, sreflec659V[0], latLonLst);
+            createVcdfVar(ncfile, sreflec659V[1], latLonLst);
+            createVcdfVar(ncfile, sreflec865V[0], latLonLst);
+            createVcdfVar(ncfile, sreflec865V[1], latLonLst);
+            createVcdfVar(ncfile, sreflec1610V[0], latLonLst);
+            createVcdfVar(ncfile, sreflec1610V[1], latLonLst);
+        }
         createVcdfVar(ncfile, sigAod550V[0], latLonLst);
         createVcdfVar(ncfile, sigAod550V[1], latLonLst);
         createVcdfVar(ncfile, sigAod550V[2], latLonLst);
@@ -704,6 +710,12 @@ public class ProdConverterL3 {
         if (atsr2) {
             ncfile.addGroupAttribute(null, new Attribute("sensor", "ATSR2"));
             ncfile.addGroupAttribute(null, new Attribute("platform", "ERS2"));
+        }
+        else if (doSyn){
+            String[] s = new String[]{"MERIS","AATSR"};
+            Array a = Array.makeArray(DataType.STRING, s);
+            ncfile.addGroupAttribute(null, new Attribute("sensor", a));
+            ncfile.addGroupAttribute(null, new Attribute("platform", "ENVISAT"));
         }
         else {
             ncfile.addGroupAttribute(null, new Attribute("sensor", "AATSR"));

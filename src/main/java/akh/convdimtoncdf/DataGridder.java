@@ -48,6 +48,8 @@ public class DataGridder {
     private UTC startTime;
     private UTC endTime;
     private String products;
+    private boolean doSyn;
+    private boolean doSurfRefl;
     
     public DataGridder() throws Exception {
         this(false);
@@ -73,12 +75,13 @@ public class DataGridder {
         absModeAodGrid  = new float[2][180][360];
         dustModeAodGrid = new float[2][180][360];
         ssaGrid         = new float[2][180][360];
-        
-        rsurf0555Grid = new float[2][180][360];
-        rsurf0659Grid = new float[2][180][360];
-        rsurf0865Grid = new float[2][180][360];
-        rsurf1600Grid = new float[2][180][360];
-        
+
+        if (doSurfRefl){
+            rsurf0555Grid = new float[2][180][360];
+            rsurf0659Grid = new float[2][180][360];
+            rsurf0865Grid = new float[2][180][360];
+            rsurf1600Grid = new float[2][180][360];
+        }
         cldFracGrid = new float[2][180][360];
         landFracGrid = new float[2][180][360];
         
@@ -123,7 +126,17 @@ public class DataGridder {
         return startTime;
     }
 
+    public boolean isDoSyn() {
+        return doSyn;
+    }
+
+    public boolean isDoSurfRefl() {
+        return doSurfRefl;
+    }
+
     public void binToGridV4(Product p, DataVersionNumbers version){
+        doSurfRefl = p.containsBand("reflec_surf_nadir_0550_1");
+        doSyn = version.equals(DataVersionNumbers.vSyn1_0);
         String fname = p.getFileLocation().getPath();
         System.out.println("binning V" + version + " - " + fname);
         try {
@@ -143,15 +156,33 @@ public class DataGridder {
             TiePointGrid latTpg = p.getTiePointGrid("latitude");
             TiePointGrid lonTpg = p.getTiePointGrid("longitude");
             
-            TiePointGrid seaNadTpg = p.getTiePointGrid("sun_elev_nadir");
-            TiePointGrid saaNadTpg = p.getTiePointGrid("sun_azimuth_nadir");
-            TiePointGrid veaNadTpg = p.getTiePointGrid("view_elev_nadir");
-            TiePointGrid vaaNadTpg = p.getTiePointGrid("view_elev_nadir");
+            TiePointGrid seaNadTpg = null;
+            TiePointGrid saaNadTpg = null;
+            TiePointGrid veaNadTpg = null;
+            TiePointGrid vaaNadTpg = null;
+
+            TiePointGrid seaFwdTpg = null;
+            TiePointGrid saaFwdTpg = null;
+            TiePointGrid veaFwdTpg = null;
+            TiePointGrid vaaFwdTpg = null;
             
-            TiePointGrid seaFwdTpg = p.getTiePointGrid("sun_elev_fward");
-            TiePointGrid saaFwdTpg = p.getTiePointGrid("sun_azimuth_fward");
-            TiePointGrid veaFwdTpg = p.getTiePointGrid("view_elev_fward");
-            TiePointGrid vaaFwdTpg = p.getTiePointGrid("view_elev_fward");
+            if (doSyn){
+                seaNadTpg = p.getTiePointGrid("sun_zenith");
+                saaNadTpg = p.getTiePointGrid("sun_azimuth");
+                veaNadTpg = p.getTiePointGrid("view_zenith");
+                vaaNadTpg = p.getTiePointGrid("view_azimuth");
+            }
+            else {
+                seaNadTpg = p.getTiePointGrid("sun_elev_nadir");
+                saaNadTpg = p.getTiePointGrid("sun_azimuth_nadir");
+                veaNadTpg = p.getTiePointGrid("view_elev_nadir");
+                vaaNadTpg = p.getTiePointGrid("view_azimuth_nadir");
+
+                seaFwdTpg = p.getTiePointGrid("sun_elev_fward");
+                saaFwdTpg = p.getTiePointGrid("sun_azimuth_fward");
+                veaFwdTpg = p.getTiePointGrid("view_elev_fward");
+                vaaFwdTpg = p.getTiePointGrid("view_azimuth_fward");
+            }
 
             Band aotNdBand = p.getBand("aot_nd_2");
             Band aotUncNdBand = p.getBand("aot_brent_nd_1");
@@ -169,11 +200,16 @@ public class DataGridder {
             Band sAot0870B = p.getBand("aot_nd_0870_1");
             Band sAot1600B = p.getBand("aot_nd_1600_1");
 
-            Band sref0555B = p.getBand("reflec_surf_nadir_0550_1");
-            Band sref0659B = p.getBand("reflec_surf_nadir_0670_1");
-            Band sref0865B = p.getBand("reflec_surf_nadir_0870_1");
-            Band sref1610B = p.getBand("reflec_surf_nadir_1600_1");
-
+            Band sref0555B = null;
+            Band sref0659B = null;
+            Band sref0865B = null;
+            Band sref1610B = null;
+            if (doSurfRefl){
+                sref0555B = p.getBand("reflec_surf_nadir_0550_1");
+                sref0659B = p.getBand("reflec_surf_nadir_0670_1");
+                sref0865B = p.getBand("reflec_surf_nadir_0870_1");
+                sref1610B = p.getBand("reflec_surf_nadir_1600_1");
+            }
             float[] lat = new float[pWidth];
             float[] lon = new float[pWidth];
             
@@ -224,11 +260,12 @@ public class DataGridder {
                 saaNadTpg.readPixels(0, iy, pWidth, 1, saaNad);
                 veaNadTpg.readPixels(0, iy, pWidth, 1, veaNad);
                 vaaNadTpg.readPixels(0, iy, pWidth, 1, vaaNad);
-                
-                seaFwdTpg.readPixels(0, iy, pWidth, 1, seaFwd);
-                saaFwdTpg.readPixels(0, iy, pWidth, 1, saaFwd);
-                veaFwdTpg.readPixels(0, iy, pWidth, 1, veaFwd);
-                vaaFwdTpg.readPixels(0, iy, pWidth, 1, vaaFwd);
+                if (!doSyn){
+                    seaFwdTpg.readPixels(0, iy, pWidth, 1, seaFwd);
+                    saaFwdTpg.readPixels(0, iy, pWidth, 1, saaFwd);
+                    veaFwdTpg.readPixels(0, iy, pWidth, 1, veaFwd);
+                    vaaFwdTpg.readPixels(0, iy, pWidth, 1, vaaFwd);
+                }
                 
                 aotNdBand.readPixels(0, iy, pWidth, 1, aotNd);
                 aotUncNdBand.readPixels(0, iy, pWidth, 1, aotUnc);
@@ -246,11 +283,12 @@ public class DataGridder {
                 absAotB.readPixels(0, iy, pWidth, 1, absAot);
                 ssaB.readPixels(0, iy, pWidth, 1, ssa);
 
-                sref0555B.readPixels(0, iy, pWidth, 1, sref0550);
-                sref0659B.readPixels(0, iy, pWidth, 1, sref0670);
-                sref0865B.readPixels(0, iy, pWidth, 1, sref0870);
-                sref1610B.readPixels(0, iy, pWidth, 1, sref1600);
-                
+                if (doSurfRefl){
+                    sref0555B.readPixels(0, iy, pWidth, 1, sref0550);
+                    sref0659B.readPixels(0, iy, pWidth, 1, sref0670);
+                    sref0865B.readPixels(0, iy, pWidth, 1, sref0870);
+                    sref1610B.readPixels(0, iy, pWidth, 1, sref1600);
+                }                
                 double angWvlLog659 = -1.0 / Math.log( 550. / 659. );
                 double angWvlLog865 = -1.0 / Math.log( 550. / 865. );
                 float razN, razF;
@@ -287,17 +325,23 @@ public class DataGridder {
                         computeRunningMeanVar(dustModeAodGrid, countGrid, ilat, ilon, dustAot);
                         computeRunningMeanVar(ssaGrid, countGrid, ilat, ilon, ssa[ix]);
                         
-                        computeRunningMeanVar(rsurf0555Grid, countGrid, ilat, ilon, sref0550[ix]);
-                        computeRunningMeanVar(rsurf0659Grid, countGrid, ilat, ilon, sref0670[ix]);
-                        computeRunningMeanVar(rsurf0865Grid, countGrid, ilat, ilon, sref0870[ix]);
-                        computeRunningMeanVar(rsurf1600Grid, countGrid, ilat, ilon, sref1600[ix]);
-                        
+                        if (doSurfRefl) {
+                            computeRunningMeanVar(rsurf0555Grid, countGrid, ilat, ilon, sref0550[ix]);
+                            computeRunningMeanVar(rsurf0659Grid, countGrid, ilat, ilon, sref0670[ix]);
+                            computeRunningMeanVar(rsurf0865Grid, countGrid, ilat, ilon, sref0870[ix]);
+                            computeRunningMeanVar(rsurf1600Grid, countGrid, ilat, ilon, sref1600[ix]);
+                        }
                         computeRunningMeanVar(cldFracGrid, countGrid, ilat, ilon, cldFrac[ix]);
                         computeRunningMeanVar(landFracGrid, countGrid, ilat, ilon, (aotFlags[ix]&1));
                         
-                        computeRunningMeanVar(szaGrid, countGrid, ilat, ilon, (90.0f - seaNad[ix]), (90.0f - seaFwd[ix]));
-                        computeRunningMeanVar(vzaGrid, countGrid, ilat, ilon, (90.0f - veaNad[ix]), (90.0f - veaFwd[ix]));
-                        
+                        if (doSyn){
+                            computeRunningMeanVar(szaGrid, countGrid, ilat, ilon, (seaNad[ix]), 0);
+                            computeRunningMeanVar(vzaGrid, countGrid, ilat, ilon, (veaNad[ix]), 0);
+                        }
+                        else {
+                            computeRunningMeanVar(szaGrid, countGrid, ilat, ilon, (90.0f - seaNad[ix]), (90.0f - seaFwd[ix]));
+                            computeRunningMeanVar(vzaGrid, countGrid, ilat, ilon, (90.0f - veaNad[ix]), (90.0f - veaFwd[ix]));
+                        }
                         razN = Math.abs(saaNad[ix]-vaaNad[ix]);
                         if (razN > 180) razN = 360.0f - razN; 
                         razF = Math.abs(saaFwd[ix]-vaaFwd[ix]);
