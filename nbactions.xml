@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+        <action>
+            <actionName>debug</actionName>
+            <goals>
+                <goal>process-classes</goal>
+                <goal>org.codehaus.mojo:exec-maven-plugin:1.1.1:exec</goal>
+            </goals>
+            <properties>
+                <exec.classpathScope>runtime</exec.classpathScope>
+                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -Xms512M -Xmx1024M -classpath %classpath akh.convdimtoncdf.ConvDimToNcdf 4.2 AT2_TOA_1PTRAL20000201_095332_000000001050_00107_25011_0000.dim</exec.args>
+                <jpda.listen>true</jpda.listen>
+                <exec.executable>java</exec.executable>
+                <exec.workingdir>e:/sat/AerosolCCI/atsr2</exec.workingdir>
+            </properties>
+        </action>
+        <action>
+            <actionName>run</actionName>
+            <goals>
+                <goal>process-classes</goal>
+                <goal>org.codehaus.mojo:exec-maven-plugin:1.1.1:exec</goal>
+            </goals>
+            <properties>
+                <exec.classpathScope>runtime</exec.classpathScope>
+                <exec.args>-Xms512M -Xmx1024M -classpath %classpath akh.convdimtoncdf.ConvDimToNcdf 4.2 AT2_TOA_1PTRAL20000201_095332_000000001050_00107_25011_0000.dim</exec.args>
+                <exec.executable>java</exec.executable>
+                <exec.workingdir>e:/sat/AerosolCCI/atsr2</exec.workingdir>
+            </properties>
+        </action>
+        <action>
+            <actionName>profile</actionName>
+            <goals>
+                <goal>process-classes</goal>
+                <goal>org.codehaus.mojo:exec-maven-plugin:1.1.1:exec</goal>
+            </goals>
+            <properties>
+                <exec.args>${profiler.args} -Xms512M -Xmx1024M -classpath %classpath akh.convdimtoncdf.ConvDimToNcdf 4.2 AT2_TOA_1PTRAL20000201_095332_000000001050_00107_25011_0000.dim</exec.args>
+                <profiler.action>profile</profiler.action>
+                <exec.executable>${profiler.java}</exec.executable>
+                <exec.workingdir>e:/sat/AerosolCCI/atsr2</exec.workingdir>
+            </properties>
+        </action>
+        <action>
+            <actionName>CUSTOM-assembly</actionName>
+            <displayName>assembly</displayName>
+            <goals>
+                <goal>assembly:assembly</goal>
+            </goals>
+        </action>
+        <action>
+            <actionName>CUSTOM-install source-jar</actionName>
+            <displayName>install source-jar</displayName>
+            <goals>
+                <goal>install</goal>
+                <goal>source:jar</goal>
+            </goals>
+        </action>
+    </actions>

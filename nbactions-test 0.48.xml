@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+        <action>
+            <actionName>run</actionName>
+            <packagings>
+                <packaging>jar</packaging>
+            </packagings>
+            <goals>
+                <goal>process-classes</goal>
+                <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
+            </goals>
+            <properties>
+                <exec.args>-Xms512M -Xmx2G -Djna.library.path="c:\temp\ncdflib" -classpath %classpath akh.convdimtoncdf.ConvDimToNcdf 4.2 CCI_V42/2008/09/ATS_TOA_1PRUPA20080901_002918_000065272071_00388_34009_8789.dim</exec.args>
+                <exec.executable>java</exec.executable>
+                <exec.workingdir>C:\sat\AerosolCCI</exec.workingdir>
+            </properties>
+        </action>
+        <action>
+            <actionName>debug</actionName>
+            <packagings>
+                <packaging>jar</packaging>
+            </packagings>
+            <goals>
+                <goal>process-classes</goal>
+                <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
+            </goals>
+            <properties>
+                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -Xms512M -Xmx2G -Djna.library.path="c:\temp\ncdflib" -classpath %classpath akh.convdimtoncdf.ConvDimToNcdf 4.2 CCI_V42/2008/09/ATS_TOA_1PRUPA20080901_002918_000065272071_00388_34009_8789.dim</exec.args>
+                <exec.executable>java</exec.executable>
+                <jpda.listen>true</jpda.listen>
+                <exec.workingdir>C:\sat\AerosolCCI</exec.workingdir>
+            </properties>
+        </action>
+        <action>
+            <actionName>profile</actionName>
+            <packagings>
+                <packaging>jar</packaging>
+            </packagings>
+            <goals>
+                <goal>process-classes</goal>
+                <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
+            </goals>
+            <properties>
+                <exec.args>-Xms512M -Xmx2G -Djna.library.path="c:\temp\ncdflib" -classpath %classpath akh.convdimtoncdf.ConvDimToNcdf 4.2 CCI_V42/2008/09/ATS_TOA_1PRUPA20080901_002918_000065272071_00388_34009_8789.dim</exec.args>
+                <exec.executable>java</exec.executable>
+                <exec.workingdir>C:\sat\AerosolCCI</exec.workingdir>
+            </properties>
+        </action>
+    </actions>
