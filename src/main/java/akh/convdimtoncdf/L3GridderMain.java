@@ -86,7 +86,7 @@ public class L3GridderMain {
                 break;
             case MONTHLY: 
                 accumulateMonthly(l3Acc);
-                 l3Acc.normVari2StdErr();
+                l3Acc.normVari2StdErr();
                 outName = String.format("%s/%04d%02d-ESACCI-L3C_AEROSOL-%s-%s-%s-v%s.nc", outPath.getPath(), year, month, prod, instrument, instTime.replaceFirst("DAILY", "MONTHLY"), version);
                 break;
             default:

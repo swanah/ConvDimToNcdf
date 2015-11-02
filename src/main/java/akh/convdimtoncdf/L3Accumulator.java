@@ -287,10 +287,11 @@ class L3Accumulator {
             float[] tmp;
             for (int i = 0; i < nVars; i++) {
                 if (propL3Unc && uncNamesL.contains(varNames[i])){
+                    float[] meanAod = meanGrids[getAodId(varNames[i])];         // mean of aod (only used aas fall back if only one sample)
                     float[] meanUnc = meanGrids[getUncMeanId(varNames[i])];     // mean of uncertainty   = 2a) systematic
                     float[] varianceAod = varianceGrids[getAodId(varNames[i])]; // std error of aod mean = 2b) sampling monthly
                     float[] rmsSdevAod = rmsGrids[getAodSdevId(varNames[i])];   // rms of aodSdev        = 2c) sampling daily
-                    tmp = computePropUncert(meanUnc, varianceAod, rmsSdevAod, i);
+                    tmp = computePropUncert(meanUnc, varianceAod, rmsSdevAod, meanAod, i);
                     ncFile.write(vArr[i + nDims + 1], Array.factory(tmp).reshapeNoCopy(vArr[i + nDims + 1].getShape()));
                 }
                 else {
@@ -465,10 +466,13 @@ class L3Accumulator {
         return -1;
     }
 
-    private float[] computePropUncert(float[] sigAODmean, float[] stderrAOD, float[] rmsAODsdev, int iVar) {
+    private float[] computePropUncert(float[] sigAODmean, float[] stderrAOD, float[] rmsAODsdev, float[] AODmean, int iVar) {
         float[] arr = new float[nCells];
         for (int i=0; i<nCells; i++){
             if (count[i] > 0){
+                if (count[i] == 1){
+                    stderrAOD[i] = (rmsAODsdev[i] > 0) ? 0.1f*rmsAODsdev[i] : 0.1f*AODmean[i];
+                }
                 arr[i] = (float)Math.sqrt( Math.pow(sigAODmean[i], 2) + Math.pow(stderrAOD[i], 2) + Math.pow(rmsAODsdev[i], 2) );
             }
             else {
