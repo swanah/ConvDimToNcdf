@@ -76,12 +76,10 @@ public class DataGridder {
         dustModeAodGrid = new float[2][180][360];
         ssaGrid         = new float[2][180][360];
 
-        if (doSurfRefl){
-            rsurf0555Grid = new float[2][180][360];
-            rsurf0659Grid = new float[2][180][360];
-            rsurf0865Grid = new float[2][180][360];
-            rsurf1600Grid = new float[2][180][360];
-        }
+        rsurf0555Grid = new float[2][180][360];
+        rsurf0659Grid = new float[2][180][360];
+        rsurf0865Grid = new float[2][180][360];
+        rsurf1600Grid = new float[2][180][360];
         cldFracGrid = new float[2][180][360];
         landFracGrid = new float[2][180][360];
         
