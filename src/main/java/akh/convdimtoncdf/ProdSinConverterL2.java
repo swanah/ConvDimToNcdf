@@ -173,7 +173,7 @@ class ProdSinConverterL2 extends BasicConverter {
         String fname = p.getFileLocation().getPath();
         System.out.println("processing V" + version + " - " + fname);
         sinP = new SinProduct(sinBandNames, p);
-        doSyn = version.equals(DataVersionNumbers.vSyn1_0);
+        doSyn = version.isGE(DataVersionNumbers.vSyn1_0);
         doSurfRefl = p.containsBand("reflec_surf_nadir_0550_1");
         binProductToSin(p, sinP);
         sinP.convCellsToArray();

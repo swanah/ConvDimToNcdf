@@ -5,7 +5,7 @@
     <groupId>akh</groupId>
     <artifactId>convDimToNcdf</artifactId>
     <packaging>jar</packaging>
-    <version>0.56</version>
+    <version>0.57</version>
     <name>convDimToNcdf</name>
     <url>http://maven.apache.org</url>
 
@@ -132,5 +132,7 @@
         v0.53 : implement single orbit L3 grids
         v0.54 : implement add unc and Min Max changed
         v0.55 : implement Syn version
-        v0.56 : adjusted L3Gridder propagate Uncertainty</description>
+        v0.56 : adjusted L3Gridder propagate Uncertainty
+        v0.57 : added SynV1.1 and 1.2
+</description>
 </project>

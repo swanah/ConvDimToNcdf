@@ -40,7 +40,7 @@ public class L3GridderMain {
                 argOff++;
             case 2:
                 version = DataVersionNumbers.parseVersionString(args[argOff]);
-                if (version.equals(DataVersionNumbers.vSyn1_0)){
+                if (version.isGE(DataVersionNumbers.vSyn1_0)){
                     instrument = "MERIS_AATSR_SYN_ENVISAT";
                 }
                 yyyymmdd = args[argOff+1];
@@ -113,8 +113,6 @@ public class L3GridderMain {
             String regExpr = String.format("%04d%02d%02d\\d{6}-ESACCI-L3C_AEROSOL-%s-%s-%s-v%s.nc", year, month, day, prod, instrument, instTime, version);
             @Override
             public boolean accept(File dir, String fname) {
-                System.err.println(fname);
-                System.err.println(regExpr);
                 return (fname.matches(regExpr));
             }
         };

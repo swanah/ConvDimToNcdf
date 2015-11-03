@@ -134,7 +134,7 @@ public class DataGridder {
 
     public void binToGridV4(Product p, DataVersionNumbers version){
         doSurfRefl = p.containsBand("reflec_surf_nadir_0550_1");
-        doSyn = version.equals(DataVersionNumbers.vSyn1_0);
+        doSyn = version.isGE(DataVersionNumbers.vSyn1_0);
         String fname = p.getFileLocation().getPath();
         System.out.println("binning V" + version + " - " + fname);
         try {

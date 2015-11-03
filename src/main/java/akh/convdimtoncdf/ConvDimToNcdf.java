@@ -94,6 +94,8 @@ public class ConvDimToNcdf {
                         case v4_21:
                         case v4_3: 
                         case vSyn1_0: 
+                        case vSyn1_1: 
+                        case vSyn1_2: 
                             pSinConvL2.convert(p, l2NetcdfName, version);
                             gridder.binToGridV4(p, version);
                             break;
@@ -170,7 +172,7 @@ public class ConvDimToNcdf {
         if (stmp.startsWith("AT2")){
             instrument = "ATSR2_ERS2";
         }
-        if (version.equals(DataVersionNumbers.vSyn1_0)){
+        if (version.isGE(DataVersionNumbers.vSyn1_0)){
             instrument = "MERIS_AATSR_SYN_ENVISAT";
             yyyymmdd = stmp.substring(12, 12+8);
             hhmmss = stmp.substring(12+8+1, 12+8+1+6);
@@ -195,7 +197,7 @@ public class ConvDimToNcdf {
         if (stmp.startsWith("AT2")){
             instrument = "ATSR2_ERS2";
         }
-        if (version.equals(DataVersionNumbers.vSyn1_0)){
+        if (version.isGE(DataVersionNumbers.vSyn1_0)){
             instrument = "MERIS_AATSR_SYN_ENVISAT";
             yyyymmdd = stmp.substring(12, 12+8);
             hhmmss = stmp.substring(12+8+1, 12+8+1+6);
