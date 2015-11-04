@@ -107,8 +107,7 @@ public class L3GridderMain {
     }
 
     private static void accumulateDaily(L3Accumulator l3Acc) {
-        l3Acc.setAccumulateCounts(true);
-        l3Acc.setPropL3Unc(false);
+        l3Acc.setDoDaily(true);
         FilenameFilter filenameFilter = new FilenameFilter() {
             String regExpr = String.format("%04d%02d%02d\\d{6}-ESACCI-L3C_AEROSOL-%s-%s-%s-v%s.nc", year, month, day, prod, instrument, instTime, version);
             @Override

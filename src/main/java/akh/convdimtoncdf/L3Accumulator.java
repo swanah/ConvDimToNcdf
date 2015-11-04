@@ -24,6 +24,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
+import ucar.ma2.IndexIterator;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.CDMNode;
@@ -67,6 +68,7 @@ class L3Accumulator {
     private boolean accumulateCounts;
     private boolean hasData;
     private boolean propL3Unc;
+    private boolean doDaily;
     private final String[] aodMeanNames;
     private final String[] uncMeanNames;
     private final String[] aodSdevNames;
@@ -155,7 +157,12 @@ class L3Accumulator {
             }
             setStartStopDate(ncFile.getGlobalAttributes());
             System.out.println(startDate + " --> " + endDate);
-            inputFileLst.add(netcdfFile.getName());
+            if (doDaily) {
+                inputFileLst.addAll(getInputFilenames(globalAttLst));
+            }
+            else {
+                inputFileLst.add(netcdfFile.getName());
+            }
             Variable v = ncFile.findVariable("pixel_count");
             int[] countArr = (int[]) v.read().copyTo1DJavaArray();
             for (int i = 0; i < nCells; i++) {
@@ -421,12 +428,40 @@ class L3Accumulator {
         }
     }
 
+    private ArrayList<String> getInputFilenames(List<Attribute> globalAtts) {
+        ArrayList<String> inputNameL = null;
+        int[] attIdx = findAttsByName(globalAttLst, new String[]{"inputfilelist"});
+        
+        if (attIdx[0] > -1){
+            inputNameL = new ArrayList<>();
+            Array a = globalAtts.get(attIdx[0]).getValues();
+            IndexIterator iter = a.getIndexIterator();
+            while (iter.hasNext()){
+                String s = (String)(iter.next());
+                if (s.endsWith(".dim")){
+                    s = s.replace(".dim", ".N1");
+                }
+                inputNameL.add(s);
+            }
+        }
+        else {
+            Logger.getLogger(L3Accumulator.class.getName()).log(Level.WARNING, "no inputfilelist found");
+        }
+        return inputNameL;
+    }
+
     public void setAccumulateCounts(boolean accumulateCounts) {
         this.accumulateCounts = accumulateCounts;
     }
 
     public void setPropL3Unc(boolean propL3Unc) {
         this.propL3Unc = propL3Unc;
+    }
+
+    public void setDoDaily(boolean doDaily) {
+        this.doDaily = doDaily;
+        setAccumulateCounts(true);
+        setPropL3Unc(false);
     }
 
     public boolean hasData (){

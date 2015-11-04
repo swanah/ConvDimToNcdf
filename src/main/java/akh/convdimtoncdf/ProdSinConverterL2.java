@@ -257,7 +257,10 @@ class ProdSinConverterL2 extends BasicConverter {
 
     @Override
     void createGlobalAttrb(NetcdfFileWriter ncfile, SinProduct sinP, String ncdfName, DataVersionNumbers version) {
-        final String prodFileName = sinP.p.getFileLocation().getName();
+        String prodFileName = sinP.p.getFileLocation().getName();
+        if (prodFileName.endsWith(".dim")){
+            prodFileName = prodFileName.replace(".dim", ".N1");
+        }
         final SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'", Locale.ENGLISH);
         df.setTimeZone(TimeZone.getTimeZone("UTC"));
         final String currentTime = df.format(new Date());

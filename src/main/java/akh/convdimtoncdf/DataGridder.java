@@ -136,6 +136,10 @@ public class DataGridder {
         doSurfRefl = p.containsBand("reflec_surf_nadir_0550_1");
         doSyn = version.isGE(DataVersionNumbers.vSyn1_0);
         String fname = p.getFileLocation().getPath();
+        String pname = p.getFileLocation().getName();
+        if (pname.endsWith(".dim")){
+            pname = pname.replace(".dim", ".N1");
+        }
         System.out.println("binning V" + version + " - " + fname);
         try {
             //p = ProductIO.readProduct(fname);
@@ -144,9 +148,9 @@ public class DataGridder {
             UTC pEndTime = p.getEndTime();
             if (pEndTime.getMJD() > endTime.getMJD()) endTime = pEndTime;
             if (products.length() == 0) {
-                products = p.getFileLocation().getName();
+                products = pname;
             } else {
-                products += " \n" + p.getFileLocation().getName();
+                products += " \n" + pname;
             }
             int pWidth = p.getSceneRasterWidth();
             int pHeight = p.getSceneRasterHeight();
