@@ -33,9 +33,11 @@ public class L3GridderMain {
         String yyyymmdd;
         switch (args.length){
             case 3:
-                switch (args[argOff].toUpperCase()){
-                    case "AATSR": instrument = "AATSR_ENVISAT"; break;
-                    case "ATSR2": instrument = "ATSR2_ERS2"; break;
+                if (args[argOff].toUpperCase().equals("AATSR")){
+                    instrument = "AATSR_ENVISAT";
+                }
+                else if (args[argOff].toUpperCase().equals("ATSR2")){
+                    instrument = "ATSR2_ERS2";
                 }
                 argOff++;
             case 2:

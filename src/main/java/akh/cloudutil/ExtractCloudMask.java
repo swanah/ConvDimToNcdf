@@ -317,7 +317,7 @@ public class ExtractCloudMask {
 
     static ArrayList<CloudSceneProperties> readSceneFromResource(String sceneResourceName) {
         String searchPath = null;
-        ArrayList<CloudSceneProperties> cloudSceneList = new ArrayList<>();
+        ArrayList<CloudSceneProperties> cloudSceneList = new ArrayList<CloudSceneProperties>();
         InputStream paramStream = ExtractCloudMask.class.getResourceAsStream(sceneResourceName);
         BufferedReader paramReader = new BufferedReader(new InputStreamReader(paramStream));
         String line = null;
@@ -365,7 +365,7 @@ public class ExtractCloudMask {
 
         if (searchPath != null) {
             if (!cloudSceneList.isEmpty()){
-                ArrayList<CloudSceneProperties> cloudSceneAddList = new ArrayList<>();
+                ArrayList<CloudSceneProperties> cloudSceneAddList = new ArrayList<CloudSceneProperties>();
                 for (CloudSceneProperties scene : cloudSceneList){
                     WildcardFileFilter wFF = new WildcardFileFilter("ATS_TOA*" + scene.getDateS() + "_*_"+scene.getOrbit()+"_*.dim");
                     File[] fl = new FindFileRecursive().listFilesAsArray(searchPath, wFF, false);

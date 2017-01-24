@@ -498,13 +498,13 @@ public class ProdConverterL3 {
         Dimension dimLat = ncfile.addDimension(null, "latitude", 180);
         Dimension dimLon = ncfile.addDimension(null, "longitude", 360);
         Dimension dimView = ncfile.addDimension(null, "instrument_view", 2);
-        ArrayList<Dimension> latLst = new ArrayList<>();
+        ArrayList<Dimension> latLst = new ArrayList<Dimension>();
         latLst.add(dimLat);
-        ArrayList<Dimension> lonLst = new ArrayList<>();
+        ArrayList<Dimension> lonLst = new ArrayList<Dimension>();
         lonLst.add(dimLon);
-        ArrayList<Dimension> viewLst = new ArrayList<>();
+        ArrayList<Dimension> viewLst = new ArrayList<Dimension>();
         viewLst.add(dimView);
-        ArrayList<Dimension> latLonLst = new ArrayList<>();
+        ArrayList<Dimension> latLonLst = new ArrayList<Dimension>();
         latLonLst.add(dimLat);
         latLonLst.add(dimLon);
         //ArrayList<Dimension> latLonViewLst = new ArrayList<>();

@@ -86,8 +86,8 @@ class L3Accumulator {
     }
 
     void initAccumulator(NetcdfFile ncFile) {
-        dimLst = new ArrayList<>(ncFile.getDimensions());
-        varLst = new ArrayList<>(ncFile.getVariables());
+        dimLst = new ArrayList<Dimension>(ncFile.getDimensions());
+        varLst = new ArrayList<Variable>(ncFile.getVariables());
         Iterator<Variable> vIter = varLst.iterator();
         while (vIter.hasNext()) {
             String vName = vIter.next().getShortName();
@@ -104,7 +104,7 @@ class L3Accumulator {
             varLst.remove((Variable) node);
         }
 
-        dimVarLst = new ArrayList<>(dimLst.size());
+        dimVarLst = new ArrayList<Variable>(dimLst.size());
         Iterator<Dimension> dimIter = dimLst.iterator();
         while (dimIter.hasNext()) {
             String dimName = dimIter.next().getShortName();
@@ -142,8 +142,8 @@ class L3Accumulator {
             Logger.getLogger(L3Accumulator.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        globalAttLst = new ArrayList<>(ncFile.getGlobalAttributes());
-        inputFileLst = new ArrayList<>(31);
+        globalAttLst = new ArrayList<Attribute>(ncFile.getGlobalAttributes());
+        inputFileLst = new ArrayList<String>(31);
         hasData = false;
         needsInit = false;
     }
@@ -259,7 +259,7 @@ class L3Accumulator {
 
     void writeGrids(String fname) {
         System.out.println("writing "+fname);
-        Map<String, Dimension> dimMap = new HashMap<>(nDims);
+        Map<String, Dimension> dimMap = new HashMap<String, Dimension>(nDims);
         Variable[] vArr = new Variable[nVars + 1 + nDims];
         NetcdfFileWriter ncFile = null;
         try {
@@ -322,7 +322,7 @@ class L3Accumulator {
     }
 
     Variable copyVar(Variable v, Map<String, Dimension> dimMap, NetcdfFileWriter ncF) {
-        List<Dimension> vDimLst = new ArrayList<>(nDims);
+        List<Dimension> vDimLst = new ArrayList<Dimension>(nDims);
         for (int i=0; i<v.getRank(); i++){
             vDimLst.add(dimMap.get(v.getDimension(i).getShortName()));
         }
@@ -372,7 +372,13 @@ class L3Accumulator {
                     iter.set(newAtt);
                 }
             }
-        } catch (UnsupportedOperationException | ClassCastException | IllegalArgumentException | IllegalStateException ex) {
+        } catch (UnsupportedOperationException ex) {
+            System.err.println(ex);
+        } catch (ClassCastException ex) {
+            System.err.println(ex);
+        } catch (IllegalArgumentException ex) {
+            System.err.println(ex);
+        } catch (IllegalStateException ex) {
             System.err.println(ex);
         }
     }
@@ -395,7 +401,7 @@ class L3Accumulator {
     
     private int[] findAttsByName(List<Attribute> attList, String[] attNames){
         int[] idx = new int[attNames.length];
-        ArrayList<String> attNameList = new ArrayList<>(attList.size());
+        ArrayList<String> attNameList = new ArrayList<String>(attList.size());
         for (int i=0; i<attList.size(); i++){
             attNameList.add(i, attList.get(i).getShortName());
         }
@@ -433,7 +439,7 @@ class L3Accumulator {
         int[] attIdx = findAttsByName(globalAttLst, new String[]{"inputfilelist"});
         
         if (attIdx[0] > -1){
-            inputNameL = new ArrayList<>();
+            inputNameL = new ArrayList<String>();
             Array a = globalAtts.get(attIdx[0]).getValues();
             IndexIterator iter = a.getIndexIterator();
             while (iter.hasNext()){

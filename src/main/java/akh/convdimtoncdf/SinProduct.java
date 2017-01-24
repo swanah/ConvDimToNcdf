@@ -41,7 +41,7 @@ public class SinProduct {
         this.proj = proj;
         this.bandNames = bandNames;
         this.nBands = bandNames.length;
-        this.cellMap = new LinkedHashMap<>(hashMapCapacity);//new HashMap<>(hashMapCapacity);
+        this.cellMap = new LinkedHashMap<Point, SinCell>(hashMapCapacity);//new HashMap<>(hashMapCapacity);
         this.p = p;
     }
 

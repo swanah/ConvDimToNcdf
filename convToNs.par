@@ -1,0 +1,4 @@
+* config file for convDimToNS
+SRCPATH = e:/sat/AerosolCCI/CCI_v42_1/%YYYY/%MM
+SRCEXT = tar.gz
+OUTPATH = e:/sat/AerosolCCI/CCI_v42_1/schutgensTest/ENVISAT_AATSR_AER-PRODUCTS-SU_%YYYY%MM.nc

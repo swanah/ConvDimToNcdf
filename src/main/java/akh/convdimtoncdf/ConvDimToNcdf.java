@@ -266,14 +266,14 @@ public class ConvDimToNcdf {
         }
     }
 
-    private static boolean isTarGzFile(String fileName) {
+    static boolean isTarGzFile(String fileName) {
         return fileName.toLowerCase().endsWith("tar.gz");
     }
 
-    private static String extractProduct(String fname) {
+    static String extractProduct(String fname) {
         String dsName = null;
         TarArchiveEntry entry;
-        final int BUFFER = 4*1024*1024; //(4MB)
+        final int BUFFER = 64*1024*1024; //(64MB)
         try {
             GZIPInputStream gzInStream = new GZIPInputStream(new FileInputStream(fname));
             TarArchiveInputStream tarInput = new TarArchiveInputStream(gzInStream);
@@ -282,7 +282,7 @@ public class ConvDimToNcdf {
                 byte[] data = new byte[BUFFER];
                 //String tempName = "/dev/shm/" + entry.getName();
                 String tempName = System.getProperty("java.io.tmpdir") + "/" + entry.getName();
-                System.err.printf("extracting %s\r", tempName);
+                //System.err.printf("extracting %s\r", tempName);
                 if (tempName.endsWith(".dim")) dsName = tempName;
                 File tempF = new File(tempName);
                 if (!tempF.exists()){
@@ -300,7 +300,7 @@ public class ConvDimToNcdf {
                     }
                 }
                 else {
-                    System.err.println("skipping extraction " + tempName + " exists!");
+                    //System.err.println("skipping extraction " + tempName + " exists!");
                 }
             }
             tarInput.close();
@@ -311,14 +311,14 @@ public class ConvDimToNcdf {
         return dsName;
     }
     
-    private static void clearTempProduct(String prodFname) {
+    static void clearTempProduct(String prodFname) {
         String dataDir = prodFname.replaceFirst("\\.dim", ".data");
         String namePat = new File(prodFname).getName().replace(".dim", ".d");
         File parentFile = new File(prodFname).getParentFile();
         FilenameFilter filter = new TmpFileFilterImpl(namePat);
         File[] tmpFiles = new FindFileRecursive().listFilesAsArray(parentFile, filter, true);
         for (int i=tmpFiles.length-1; i>=0; i--) {
-            System.out.printf("deleting temp file %s\r", tmpFiles[i].getPath());
+            //System.out.printf("deleting temp file %s\r", tmpFiles[i].getPath());
             tmpFiles[i].delete();
         }
         /*        
@@ -383,7 +383,7 @@ public class ConvDimToNcdf {
 
     
     
-    private static class TmpFileFilterImpl implements FilenameFilter {
+    static class TmpFileFilterImpl implements FilenameFilter {
         final String pattern;
 
         public TmpFileFilterImpl(String pattern) {

@@ -69,7 +69,7 @@ public class CombineCloudScene {
                 Assert.notNull(p);
 
                 Rectangle region = getGeoRec(p, cloudPoints.latMin, cloudPoints.latMax, -180, 180);
-                ArrayList<String> bandNames = new ArrayList<>();
+                ArrayList<String> bandNames = new ArrayList<String>();
                 for (String bname : p.getBandNames()) {
                     if (bname.contains("flags")
                             || bname.startsWith("reflec_nadir")
@@ -271,7 +271,7 @@ public class CombineCloudScene {
         float latMax = -99999;
 
         public DataPointList(int n) {
-            points = new ArrayList<>(n);
+            points = new ArrayList<DataPoint>(n);
         }
 
         public void add(GeoPos gp, byte val) {
