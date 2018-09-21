@@ -51,24 +51,24 @@ public class ProdConverterL3 {
             new NetcdfVariableProperties("pixel_count", "number of retrieval pixels in grid cell", "", "1", DataType.INT, 1, 1000, 0, "latitude longitude");
     
     private final NetcdfVariableProperties aod550V[] = new NetcdfVariableProperties[]{
-            new NetcdfVariableProperties("AOD550_mean", "aerosol optical thickness at 550 nm", "atmosphere_optical_thickness_due_to_ambient_aerosol", "1", DataType.FLOAT, 0f, 2f, -999f, "latitude longitude"),
-            new NetcdfVariableProperties("AOD550_sdev", "standard deviation aerosol optical thickness at 550 nm", "", "1", DataType.FLOAT, 0f, 2f, -999f, "latitude longitude")
+            new NetcdfVariableProperties("AOD550_mean", "aerosol optical thickness at 550 nm", "atmosphere_optical_thickness_due_to_ambient_aerosol", "1", DataType.FLOAT, 0f, 4f, -999f, "latitude longitude"),
+            new NetcdfVariableProperties("AOD550_sdev", "standard deviation aerosol optical thickness at 550 nm", "", "1", DataType.FLOAT, 0f, 4f, -999f, "latitude longitude")
     };
     //private final NetcdfVariableProperties aod555V[] = new NetcdfVariableProperties[]{
     //        new NetcdfVariableProperties("AOD555_mean", "aerosol optical thickness at 555 nm", "atmosphere_optical_thickness_due_to_ambient_aerosol", "1", 0f, 2f, -999f),
     //        new NetcdfVariableProperties("AOD555_sdev", "standard deviation aerosol optical thickness at 555 nm", "", "1", 0f, 2f, -999f)
     //};
     private final NetcdfVariableProperties aod659V[] = new NetcdfVariableProperties[]{
-            new NetcdfVariableProperties("AOD670_mean", "aerosol optical thickness at 670 nm", "atmosphere_optical_thickness_due_to_ambient_aerosol", "1", DataType.FLOAT, 0f, 2f, -999f, "latitude longitude"),
-            new NetcdfVariableProperties("AOD670_sdev", "standard deviation aerosol optical thickness at 670 nm", "", "1", DataType.FLOAT, 0f, 2f, -999f, "latitude longitude")
+            new NetcdfVariableProperties("AOD670_mean", "aerosol optical thickness at 670 nm", "atmosphere_optical_thickness_due_to_ambient_aerosol", "1", DataType.FLOAT, 0f, 4f, -999f, "latitude longitude"),
+            new NetcdfVariableProperties("AOD670_sdev", "standard deviation aerosol optical thickness at 670 nm", "", "1", DataType.FLOAT, 0f, 4f, -999f, "latitude longitude")
     };
     private final NetcdfVariableProperties aod865V[] = new NetcdfVariableProperties[]{
-            new NetcdfVariableProperties("AOD870_mean", "aerosol optical thickness at 870 nm", "atmosphere_optical_thickness_due_to_ambient_aerosol", "1", DataType.FLOAT, 0f, 2f, -999f, "latitude longitude"),
-            new NetcdfVariableProperties("AOD870_sdev", "standard deviation aerosol optical thickness at 870 nm", "", "1", DataType.FLOAT, 0f, 2f, -999f, "latitude longitude")
+            new NetcdfVariableProperties("AOD870_mean", "aerosol optical thickness at 870 nm", "atmosphere_optical_thickness_due_to_ambient_aerosol", "1", DataType.FLOAT, 0f, 4f, -999f, "latitude longitude"),
+            new NetcdfVariableProperties("AOD870_sdev", "standard deviation aerosol optical thickness at 870 nm", "", "1", DataType.FLOAT, 0f, 4f, -999f, "latitude longitude")
     };
     private final NetcdfVariableProperties aod1610V[] = new NetcdfVariableProperties[]{
-            new NetcdfVariableProperties("AOD1600_mean", "aerosol optical thickness at 1600 nm", "atmosphere_optical_thickness_due_to_ambient_aerosol", "1", DataType.FLOAT, 0f, 2f, -999f, "latitude longitude"),
-            new NetcdfVariableProperties("AOD1600_sdev", "standard deviation aerosol optical thickness at 1600 nm", "", "1", DataType.FLOAT, 0f, 2f, -999f, "latitude longitude")
+            new NetcdfVariableProperties("AOD1600_mean", "aerosol optical thickness at 1600 nm", "atmosphere_optical_thickness_due_to_ambient_aerosol", "1", DataType.FLOAT, 0f, 4f, -999f, "latitude longitude"),
+            new NetcdfVariableProperties("AOD1600_sdev", "standard deviation aerosol optical thickness at 1600 nm", "", "1", DataType.FLOAT, 0f, 4f, -999f, "latitude longitude")
     };
 
     private final NetcdfVariableProperties sigAod550V[] = new NetcdfVariableProperties[]{
@@ -120,16 +120,16 @@ public class ProdConverterL3 {
     };
 
     private final NetcdfVariableProperties fineModeV[] = new NetcdfVariableProperties[]{
-            new NetcdfVariableProperties("FM_AOD550_mean", "fine mode AOD", "atmosphere_optical_thickness_due_to_ambient_aerosol", "1", DataType.FLOAT, 0f, 2f, -999f, "latitude longitude"),
-            new NetcdfVariableProperties("FM_AOD550_sdev", "standard deviation fine mode AOD", "", "1", DataType.FLOAT, 0f, 2f, -999f, "latitude longitude")
+            new NetcdfVariableProperties("FM_AOD550_mean", "fine mode AOD", "atmosphere_optical_thickness_due_to_ambient_aerosol", "1", DataType.FLOAT, 0f, 4f, -999f, "latitude longitude"),
+            new NetcdfVariableProperties("FM_AOD550_sdev", "standard deviation fine mode AOD", "", "1", DataType.FLOAT, 0f, 4f, -999f, "latitude longitude")
     };
     private final NetcdfVariableProperties absModeV[] = new NetcdfVariableProperties[]{
-            new NetcdfVariableProperties("AAOD550_mean", "absorbing AOD", "atmosphere_optical_thickness_due_to_ambient_aerosol", "1", DataType.FLOAT, 0f, 2f, -999f, "latitude longitude"),
-            new NetcdfVariableProperties("AAOD550_sdev", "standard deviation absorbing AOD", "", "1", DataType.FLOAT, 0f, 2f, -999f, "latitude longitude")
+            new NetcdfVariableProperties("AAOD550_mean", "absorbing AOD", "atmosphere_optical_thickness_due_to_ambient_aerosol", "1", DataType.FLOAT, 0f, 4f, -999f, "latitude longitude"),
+            new NetcdfVariableProperties("AAOD550_sdev", "standard deviation absorbing AOD", "", "1", DataType.FLOAT, 0f, 4f, -999f, "latitude longitude")
     };
     private final NetcdfVariableProperties dustModeV[] = new NetcdfVariableProperties[]{
-            new NetcdfVariableProperties("D_AOD550_mean", "non-spherical dust AOD", "atmosphere_optical_thickness_due_to_ambient_aerosol", "1", DataType.FLOAT, 0f, 2f, -999f, "latitude longitude"),
-            new NetcdfVariableProperties("D_AOD550_sdev", "standard deviation non-spherical dust AOD", "", "1", DataType.FLOAT, 0f, 2f, -999f, "latitude longitude")
+            new NetcdfVariableProperties("D_AOD550_mean", "non-spherical dust AOD", "atmosphere_optical_thickness_due_to_ambient_aerosol", "1", DataType.FLOAT, 0f, 4f, -999f, "latitude longitude"),
+            new NetcdfVariableProperties("D_AOD550_sdev", "standard deviation non-spherical dust AOD", "", "1", DataType.FLOAT, 0f, 4f, -999f, "latitude longitude")
     };
     private final NetcdfVariableProperties ssaV[] = new NetcdfVariableProperties[]{
             new NetcdfVariableProperties("SSA550_mean", "single scattering albedo at 550nm", "", "1", DataType.FLOAT, 0f, 2f, -999f, "latitude longitude"),
@@ -137,20 +137,20 @@ public class ProdConverterL3 {
     };
     
     private final NetcdfVariableProperties sreflec555V[] = new NetcdfVariableProperties[]{
-            new NetcdfVariableProperties("surface_reflectance550_mean", "mean bidirectional surface reflectance (nadir)", "", "1", DataType.FLOAT, 0f, 1f, -999f, "latitude longitude"),
-            new NetcdfVariableProperties("surface_reflectance550_sdev", "standard deviation mean bidirectional surface reflectance (nadir)", "", "1", DataType.FLOAT, 0f, 1f, -999f, "latitude longitude")
+            new NetcdfVariableProperties("surface_reflectance550_mean", "mean bidirectional surface reflectance (nadir)", "", "1", DataType.FLOAT, 0f, 2f, -999f, "latitude longitude"),
+            new NetcdfVariableProperties("surface_reflectance550_sdev", "standard deviation mean bidirectional surface reflectance (nadir)", "", "1", DataType.FLOAT, 0f, 2f, -999f, "latitude longitude")
     };
     private final NetcdfVariableProperties sreflec659V[] = new NetcdfVariableProperties[]{
-            new NetcdfVariableProperties("surface_reflectance670_mean", "mean bidirectional surface reflectance (nadir)", "", "1", DataType.FLOAT, 0f, 1f, -999f, "latitude longitude"),
-            new NetcdfVariableProperties("surface_reflectance670_sdev", "standard deviation mean bidirectional surface reflectance (nadir)", "", "1", DataType.FLOAT, 0f, 1f, -999f, "latitude longitude")
+            new NetcdfVariableProperties("surface_reflectance670_mean", "mean bidirectional surface reflectance (nadir)", "", "1", DataType.FLOAT, 0f, 2f, -999f, "latitude longitude"),
+            new NetcdfVariableProperties("surface_reflectance670_sdev", "standard deviation mean bidirectional surface reflectance (nadir)", "", "1", DataType.FLOAT, 0f, 2f, -999f, "latitude longitude")
     };
     private final NetcdfVariableProperties sreflec865V[] = new NetcdfVariableProperties[]{
-            new NetcdfVariableProperties("surface_reflectance870_mean", "mean bidirectional surface reflectance (nadir)", "", "1", DataType.FLOAT, 0f, 1f, -999f, "latitude longitude"),
-            new NetcdfVariableProperties("surface_reflectance870_sdev", "standard deviation mean bidirectional surface reflectance (nadir)", "", "1", DataType.FLOAT, 0f, 1f, -999f, "latitude longitude")
+            new NetcdfVariableProperties("surface_reflectance870_mean", "mean bidirectional surface reflectance (nadir)", "", "1", DataType.FLOAT, 0f, 2f, -999f, "latitude longitude"),
+            new NetcdfVariableProperties("surface_reflectance870_sdev", "standard deviation mean bidirectional surface reflectance (nadir)", "", "1", DataType.FLOAT, 0f, 2f, -999f, "latitude longitude")
     };
     private final NetcdfVariableProperties sreflec1610V[] = new NetcdfVariableProperties[]{
-            new NetcdfVariableProperties("surface_reflectance1600_mean", "mean bidirectional surface reflectance (nadir)", "", "1", DataType.FLOAT, 0f, 1f, -999f, "latitude longitude"),
-            new NetcdfVariableProperties("surface_reflectance1600_sdev", "standard deviation mean bidirectional surface reflectance (nadir)", "", "1", DataType.FLOAT, 0f, 1f, -999f, "latitude longitude")
+            new NetcdfVariableProperties("surface_reflectance1600_mean", "mean bidirectional surface reflectance (nadir)", "", "1", DataType.FLOAT, 0f, 2f, -999f, "latitude longitude"),
+            new NetcdfVariableProperties("surface_reflectance1600_sdev", "standard deviation mean bidirectional surface reflectance (nadir)", "", "1", DataType.FLOAT, 0f, 2f, -999f, "latitude longitude")
     };
 
     private final NetcdfVariableProperties cldFracV[] = new NetcdfVariableProperties[]{
@@ -190,6 +190,142 @@ public class ProdConverterL3 {
         return instance;
     }
 
+    public void writeGridsS3(DataGridder gridder, String ncName, S3DataVersionNumbers version) throws IOException, InvalidRangeException {
+        doSyn = gridder.isDoSyn();
+        doSurfRefl = gridder.isDoSurfRefl();
+        final SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'", Locale.ENGLISH);
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+        Map<String, String> prodInfo = new HashMap<String, String>(4);
+        prodInfo.put("StartDate", df.format(gridder.getStartTime().getAsDate()));
+        prodInfo.put("StopDate", df.format(gridder.getEndTime().getAsDate()));
+        prodInfo.put("Name", "");
+        prodInfo.put("ProductList", gridder.getProducts());
+        prodInfo.put("Source", gridder.getSourceStr());
+        NetcdfFileWriter ncdfFile = createNcdfFile_S3(ncName, prodInfo, version);
+        
+        float[] latArr = new float[180];
+        for (int i=0; i<180; i++) latArr[i] = i - 89.5f;
+        ncdfFile.write(latV.ncV, ArrayFloat.factory(latArr));
+        float[] lonArr = new float[360];
+        for (int i=0; i<360; i++) lonArr[i] = i - 179.5f;
+        ncdfFile.write(lonV.ncV, ArrayFloat.factory(lonArr));
+
+        //ncdfFile.write(viewV.ncV, ArrayFloat.factory(new int[]{0, 1}));
+        
+        Array dI = new ArrayInt.D2(1, 1);
+        Array dF = new ArrayFloat.D2(1, 1);
+        ArrayFloat.D3 dF3 = new ArrayFloat.D3(1, 1, 2);
+        int[] origin = new int[3];
+        origin[2] = 0;
+        for (origin[0]=0; origin[0]<180; origin[0]++){
+            for (origin[1] = 0; origin[1] < 360; origin[1]++) {
+                if (gridder.countGrid[origin[0]][origin[1]] > 0) {
+                    dI.setInt(0, gridder.countGrid[origin[0]][origin[1]]);
+                    ncdfFile.write(pixCountV.ncV, origin, dI);
+                    for (int i = 0; i < 2; i++) {
+                        dF.setFloat(0, getMeanOrSdev(i, gridder.aod550Grid, gridder.countGrid, origin[0], origin[1]));
+                        ncdfFile.write(aod550V[i].ncV, origin, dF);
+
+                        dF.setFloat(0, getMeanOrSdev(i, gridder.sigAod550Grid, gridder.countGrid, origin[0], origin[1]));
+                        ncdfFile.write(sigAod550V[i].ncV, origin, dF);
+
+                        //dF.setFloat(0, getMeanOrSdev(i, gridder.aod0555Grid, gridder.countGrid, origin[0], origin[1]));
+                        //ncdfFile.write(aod555V[i].ncV, origin, dF);
+                        dF.setFloat(0, getMeanOrSdev(i, gridder.aod670Grid, gridder.countGrid, origin[0], origin[1]));
+                        ncdfFile.write(aod659V[i].ncV, origin, dF);
+                        dF.setFloat(0, getMeanOrSdev(i, gridder.aod870Grid, gridder.countGrid, origin[0], origin[1]));
+                        ncdfFile.write(aod865V[i].ncV, origin, dF);
+                        dF.setFloat(0, getMeanOrSdev(i, gridder.aod1600Grid, gridder.countGrid, origin[0], origin[1]));
+                        ncdfFile.write(aod1610V[i].ncV, origin, dF);
+
+                        //dF.setFloat(0, getMeanOrSdev(i, gridder.sigAod555Grid, gridder.countGrid, origin[0], origin[1]));
+                        //ncdfFile.write(sigAod555V[i].ncV, origin, dF);
+                        dF.setFloat(0, getMeanOrSdev(i, gridder.sigAod659Grid, gridder.countGrid, origin[0], origin[1]));
+                        ncdfFile.write(sigAod670V[i].ncV, origin, dF);
+                        dF.setFloat(0, getMeanOrSdev(i, gridder.sigAod865Grid, gridder.countGrid, origin[0], origin[1]));
+                        ncdfFile.write(sigAod870V[i].ncV, origin, dF);
+                        dF.setFloat(0, getMeanOrSdev(i, gridder.sigAod1600Grid, gridder.countGrid, origin[0], origin[1]));
+                        ncdfFile.write(sigAod1600V[i].ncV, origin, dF);
+
+                        if (doSurfRefl){
+                            dF.setFloat(0, getMeanOrSdev(i, gridder.rsurf0555Grid, gridder.countGrid, origin[0], origin[1]));
+                            ncdfFile.write(sreflec555V[i].ncV, origin, dF);
+                            dF.setFloat(0, getMeanOrSdev(i, gridder.rsurf0659Grid, gridder.countGrid, origin[0], origin[1]));
+                            ncdfFile.write(sreflec659V[i].ncV, origin, dF);
+                            dF.setFloat(0, getMeanOrSdev(i, gridder.rsurf0865Grid, gridder.countGrid, origin[0], origin[1]));
+                            ncdfFile.write(sreflec865V[i].ncV, origin, dF);
+                            dF.setFloat(0, getMeanOrSdev(i, gridder.rsurf1600Grid, gridder.countGrid, origin[0], origin[1]));
+                            ncdfFile.write(sreflec1610V[i].ncV, origin, dF);
+                        }
+                        //dF.setFloat(0, getMeanOrSdev(i, gridder.angstrom659Grid, gridder.countGrid, origin[0], origin[1]));
+                        //ncdfFile.write(angstrom659V[i].ncV, origin, dF);
+                        dF.setFloat(0, getMeanOrSdev(i, gridder.angstrom865Grid, gridder.countGrid, origin[0], origin[1]));
+                        ncdfFile.write(angstrom865V[i].ncV, origin, dF);
+                        
+                        dF.setFloat(0, getMeanOrSdev(i, gridder.fineModeAodGrid, gridder.countGrid, origin[0], origin[1]));
+                        ncdfFile.write(fineModeV[i].ncV, origin, dF);
+                        dF.setFloat(0, getMeanOrSdev(i, gridder.absModeAodGrid, gridder.countGrid, origin[0], origin[1]));
+                        ncdfFile.write(absModeV[i].ncV, origin, dF);
+                        dF.setFloat(0, getMeanOrSdev(i, gridder.dustModeAodGrid, gridder.countGrid, origin[0], origin[1]));
+                        ncdfFile.write(dustModeV[i].ncV, origin, dF);
+                        dF.setFloat(0, getMeanOrSdev(i, gridder.ssaGrid, gridder.countGrid, origin[0], origin[1]));
+                        ncdfFile.write(ssaV[i].ncV, origin, dF);
+
+                        //dF.setFloat(0, getMeanOrSdev(i, gridder.cldFracGrid, gridder.countGrid, origin[0], origin[1]));
+                        //ncdfFile.write(cldFracV[i].ncV, origin, dF);
+                        //dF.setFloat(0, getMeanOrSdev(i, gridder.landFracGrid, gridder.countGrid, origin[0], origin[1]));
+                        //ncdfFile.write(landFlagV[i].ncV, origin, dF);
+
+                        //dF3.set(0, 0, 0, getMeanOrSdev(i, gridder.szaGrid, gridder.countGrid, origin[0], origin[1], 0));
+                        //dF3.set(0, 0, 1, getMeanOrSdev(i, gridder.szaGrid, gridder.countGrid, origin[0], origin[1], 1));
+                        //ncdfFile.write(szaV[i].ncV, origin, dF3);
+                        //dF3.set(0, 0, 0, getMeanOrSdev(i, gridder.vzaGrid, gridder.countGrid, origin[0], origin[1], 0));
+                        //dF3.set(0, 0, 1, getMeanOrSdev(i, gridder.vzaGrid, gridder.countGrid, origin[0], origin[1], 1));
+                        //ncdfFile.write(vzaV[i].ncV, origin, dF3);
+                        //dF3.set(0, 0, 0, getMeanOrSdev(i, gridder.razGrid, gridder.countGrid, origin[0], origin[1], 0));
+                        //dF3.set(0, 0, 1, getMeanOrSdev(i, gridder.razGrid, gridder.countGrid, origin[0], origin[1], 1));
+                        //ncdfFile.write(razV[i].ncV, origin, dF3);
+
+                    }
+                    //
+                    // write propagted Uncertainty
+                    //
+/**/
+                    float unc = propagateUnc(gridder.aod550Grid, gridder.sigAod550Grid, gridder.countGrid, origin[0], origin[1]);
+                    dF.setFloat(0, unc);
+                    ncdfFile.write(sigAod550V[2].ncV, origin, dF);
+                    unc = propagateUnc(gridder.aod670Grid, gridder.sigAod659Grid, gridder.countGrid, origin[0], origin[1]);
+                    dF.setFloat(0, unc);
+                    ncdfFile.write(sigAod670V[2].ncV, origin, dF);
+                    unc = propagateUnc(gridder.aod870Grid, gridder.sigAod865Grid, gridder.countGrid, origin[0], origin[1]);
+                    dF.setFloat(0, unc);
+                    ncdfFile.write(sigAod870V[2].ncV, origin, dF);
+                    unc = propagateUnc(gridder.aod1600Grid, gridder.sigAod1600Grid, gridder.countGrid, origin[0], origin[1]);
+                    dF.setFloat(0, unc);
+                    ncdfFile.write(sigAod1600V[2].ncV, origin, dF);
+/**/
+                    //
+                    // write Min Max values of L2 Uncertainties
+                    //
+/**/
+                    for (int i = 3; i < 5; i++) {
+                        dF.setFloat(0, getMeanOrSdev(i, gridder.sigAod550Grid, gridder.countGrid, origin[0], origin[1]));
+                        ncdfFile.write(sigAod550V[i].ncV, origin, dF);
+                        //dF.setFloat(0, getMeanOrSdev(i, gridder.sigAod555Grid, gridder.countGrid, origin[0], origin[1]));
+                        //ncdfFile.write(sigAod555V[i].ncV, origin, dF);
+                        dF.setFloat(0, getMeanOrSdev(i, gridder.sigAod659Grid, gridder.countGrid, origin[0], origin[1]));
+                        ncdfFile.write(sigAod670V[i].ncV, origin, dF);
+                        dF.setFloat(0, getMeanOrSdev(i, gridder.sigAod865Grid, gridder.countGrid, origin[0], origin[1]));
+                        ncdfFile.write(sigAod870V[i].ncV, origin, dF);
+                        dF.setFloat(0, getMeanOrSdev(i, gridder.sigAod1600Grid, gridder.countGrid, origin[0], origin[1]));
+                        ncdfFile.write(sigAod1600V[i].ncV, origin, dF);
+                    }
+/**/
+                }
+            }
+        }
+    }
+    
     public void writeGrids(DataGridder gridder, String ncName, DataVersionNumbers version) throws IOException, InvalidRangeException {
         
         if ( version.isGT(DataVersionNumbers.v4_0)) {
@@ -493,6 +629,105 @@ public class ProdConverterL3 {
         return ncfile;
     }
 
+    private NetcdfFileWriter createNcdfFile_S3(String ncdfName, Map<String,String> prodInfo, S3DataVersionNumbers version) throws IOException {
+        NetcdfFileWriter ncfile = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, ncdfName);
+        Dimension dimLat = ncfile.addDimension(null, "latitude", 180);
+        Dimension dimLon = ncfile.addDimension(null, "longitude", 360);
+        Dimension dimView = ncfile.addDimension(null, "instrument_view", 2);
+        ArrayList<Dimension> latLst = new ArrayList<Dimension>();
+        latLst.add(dimLat);
+        ArrayList<Dimension> lonLst = new ArrayList<Dimension>();
+        lonLst.add(dimLon);
+        ArrayList<Dimension> viewLst = new ArrayList<Dimension>();
+        viewLst.add(dimView);
+        ArrayList<Dimension> latLonLst = new ArrayList<Dimension>();
+        latLonLst.add(dimLat);
+        latLonLst.add(dimLon);
+        //ArrayList<Dimension> latLonViewLst = new ArrayList<>();
+        //latLonViewLst.add(dimLat);
+        //latLonViewLst.add(dimLon);
+        //latLonViewLst.add(dimView);
+
+        createVcdfVar(ncfile, latV, latLst);
+        createVcdfVar(ncfile, lonV, lonLst);
+        //createVcdfVar(ncfile, viewV, viewLst);
+        createVcdfVar(ncfile, pixCountV, latLonLst);
+        
+        createVcdfVar(ncfile, aod550V[0], latLonLst);
+        createVcdfVar(ncfile, aod550V[1], latLonLst);
+        createVcdfVar(ncfile, aod659V[0], latLonLst);
+        createVcdfVar(ncfile, aod659V[1], latLonLst);
+        createVcdfVar(ncfile, aod865V[0], latLonLst);
+        createVcdfVar(ncfile, aod865V[1], latLonLst);
+        createVcdfVar(ncfile, aod1610V[0], latLonLst);
+        createVcdfVar(ncfile, aod1610V[1], latLonLst);
+
+        //createVcdfVar(ncfile, angstrom659V[i], dimList);
+        createVcdfVar(ncfile, angstrom865V[0], latLonLst);
+        createVcdfVar(ncfile, angstrom865V[1], latLonLst);
+
+        createVcdfVar(ncfile, fineModeV[0], latLonLst);
+        createVcdfVar(ncfile, fineModeV[1], latLonLst);
+        createVcdfVar(ncfile, dustModeV[0], latLonLst);
+        createVcdfVar(ncfile, dustModeV[1], latLonLst);
+        createVcdfVar(ncfile, absModeV[0], latLonLst);
+        createVcdfVar(ncfile, absModeV[1], latLonLst);
+        createVcdfVar(ncfile, ssaV[0], latLonLst);
+        createVcdfVar(ncfile, ssaV[1], latLonLst);
+
+        if (doSurfRefl){
+            createVcdfVar(ncfile, sreflec555V[0], latLonLst);
+            createVcdfVar(ncfile, sreflec555V[1], latLonLst);
+            createVcdfVar(ncfile, sreflec659V[0], latLonLst);
+            createVcdfVar(ncfile, sreflec659V[1], latLonLst);
+            createVcdfVar(ncfile, sreflec865V[0], latLonLst);
+            createVcdfVar(ncfile, sreflec865V[1], latLonLst);
+            createVcdfVar(ncfile, sreflec1610V[0], latLonLst);
+            createVcdfVar(ncfile, sreflec1610V[1], latLonLst);
+        }
+        createVcdfVar(ncfile, sigAod550V[0], latLonLst);
+        createVcdfVar(ncfile, sigAod550V[1], latLonLst);
+        createVcdfVar(ncfile, sigAod550V[2], latLonLst);
+        createVcdfVar(ncfile, sigAod550V[3], latLonLst);
+        createVcdfVar(ncfile, sigAod550V[4], latLonLst);
+        if(version.equals(DataVersionNumbers.v4_21u)){
+            createVcdfVar(ncfile, sigAod550V[5], latLonLst);
+            createVcdfVar(ncfile, sigAod550V[6], latLonLst);
+            createVcdfVar(ncfile, sigAod550V[7], latLonLst);
+        }
+        createVcdfVar(ncfile, sigAod670V[0], latLonLst);
+        createVcdfVar(ncfile, sigAod670V[1], latLonLst);
+        createVcdfVar(ncfile, sigAod670V[2], latLonLst);
+        createVcdfVar(ncfile, sigAod670V[3], latLonLst);
+        createVcdfVar(ncfile, sigAod670V[4], latLonLst);
+        createVcdfVar(ncfile, sigAod870V[0], latLonLst);
+        createVcdfVar(ncfile, sigAod870V[1], latLonLst);
+        createVcdfVar(ncfile, sigAod870V[2], latLonLst);
+        createVcdfVar(ncfile, sigAod870V[3], latLonLst);
+        createVcdfVar(ncfile, sigAod870V[4], latLonLst);
+        createVcdfVar(ncfile, sigAod1600V[0], latLonLst);
+        createVcdfVar(ncfile, sigAod1600V[1], latLonLst);
+        createVcdfVar(ncfile, sigAod1600V[2], latLonLst);
+        createVcdfVar(ncfile, sigAod1600V[3], latLonLst);
+        createVcdfVar(ncfile, sigAod1600V[4], latLonLst);
+
+        //createVcdfVar(ncfile, cldFracV[0], latLonLst);
+        //createVcdfVar(ncfile, cldFracV[1], latLonLst);
+        //createVcdfVar(ncfile, landFlagV[0], latLonLst);
+        //createVcdfVar(ncfile, landFlagV[1], latLonLst);
+
+        //createVcdfVar(ncfile, szaV[0], latLonViewLst);
+        //createVcdfVar(ncfile, szaV[1], latLonViewLst);
+        //createVcdfVar(ncfile, vzaV[0], latLonViewLst);
+        //createVcdfVar(ncfile, vzaV[1], latLonViewLst);
+        //createVcdfVar(ncfile, razV[0], latLonViewLst);
+        //createVcdfVar(ncfile, razV[1], latLonViewLst);
+        
+        createGlobalAttrb(ncfile, prodInfo, ncdfName, version);
+        ncfile.create();
+        return ncfile;
+    }
+    
     private NetcdfFileWriter createNcdfFile_V4(String ncdfName, Map<String,String> prodInfo, DataVersionNumbers version) throws IOException {
         NetcdfFileWriter ncfile = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, ncdfName);
         Dimension dimLat = ncfile.addDimension(null, "latitude", 180);
@@ -687,6 +922,59 @@ public class ProdConverterL3 {
 		ncfile.addGlobalAttribute("license", "ESA CCI Data Policy: free and open access");
 		ncfile.addGlobalAttribute("geospatial_lat_units", "degrees_north");
 		ncfile.addGlobalAttribute("geospatial_lon_units", "degrees_east");         
+    }
+
+    private static void createGlobalAttrb(NetcdfFileWriter ncfile, Map<String, String> prodInfo, String ncdfName, S3DataVersionNumbers version) {
+        final String StartDate = prodInfo.get("StartDate");
+        final String StopDate = prodInfo.get("StopDate");
+        final SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'", Locale.ENGLISH);
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+        final String CurrentTime = df.format(new Date());
+
+        final String prodList = prodInfo.get("ProductList");        
+        final String idStr = new File(ncdfName).getName();
+        
+        ncfile.addGroupAttribute(null, new Attribute("Conventions", "CF-1.6"));
+        ncfile.addGroupAttribute(null, new Attribute("tracking_id", UUID.randomUUID().toString()));
+        ncfile.addGroupAttribute(null, new Attribute("naming_authority", "uk.ac.su.aatsraerosol"));
+        ncfile.addGroupAttribute(null, new Attribute("title", "AARDVARC C3S aerosol product level 3"));
+        ncfile.addGroupAttribute(null, new Attribute("product_version", version.toString()));
+		ncfile.addGroupAttribute(null, new Attribute("summary", "This dataset contains the level-3 daily mean aerosol properties products from SLSTR satellite observations. Data are processed by Swansea algorithm"));
+		ncfile.addGroupAttribute(null, new Attribute("id", idStr));
+        ncfile.addGroupAttribute(null, new Attribute("sensor", "SLSTR"));
+        ncfile.addGroupAttribute(null, new Attribute("platform", "SENTINEL-S3A"));
+        ncfile.addGroupAttribute(null, new Attribute("resolution", "1x1 degrees"));
+        ncfile.addGroupAttribute(null, new Attribute("projection", "equirectangular"));
+		ncfile.addGroupAttribute(null, new Attribute("cdm_data_type", "grid"));
+		ncfile.addGroupAttribute(null, new Attribute("lon", 360));
+		ncfile.addGroupAttribute(null, new Attribute("lat", 180));
+		ncfile.addGroupAttribute(null, new Attribute("time", "1"));
+		ncfile.addGroupAttribute(null, new Attribute("time_coverage_start", StartDate));
+		ncfile.addGroupAttribute(null, new Attribute("time_coverage_end", StopDate));
+		ncfile.addGroupAttribute(null, new Attribute("geospatial_lat_min", "-90.0"));
+		ncfile.addGroupAttribute(null, new Attribute("geospatial_lat_max", "90.0"));
+		ncfile.addGroupAttribute(null, new Attribute("geospatial_lon_min", "-180.0"));
+		ncfile.addGroupAttribute(null, new Attribute("geospatial_lon_max", "180.0"));
+		ncfile.addGroupAttribute(null, new Attribute("geospatial_lat_units", "degrees_north"));
+		ncfile.addGroupAttribute(null, new Attribute("geospatial_lon_units", "degrees_east"));         
+		ncfile.addGroupAttribute(null, new Attribute("geospatial_lat_resolution", "1.0"));
+		ncfile.addGroupAttribute(null, new Attribute("geospatial_lon_resolution", "1.0"));         
+        ncfile.addGroupAttribute(null, new Attribute("date_created", CurrentTime));
+		ncfile.addGroupAttribute(null, new Attribute("project", "Climate Change Initiative - European Space Agency"));
+        ncfile.addGroupAttribute(null, new Attribute("references", "http://www.esa-aerosol-cci.org"));
+		//ncfile.addGroupAttribute(null, new Attribute("institution", "Swansea University"));
+		ncfile.addGroupAttribute(null, new Attribute("creator_name", "Swansea University"));
+		ncfile.addGroupAttribute(null, new Attribute("creator_url", "http://www.swan.ac.uk/staff/academic/environmentsociety/geography/northpeter/"));
+		ncfile.addGroupAttribute(null, new Attribute("creator_email", "p.r.j.north@swansea.ac.uk, a.heckel@swansea.ac.uk"));
+        ncfile.addGroupAttribute(null, new Attribute("source", prodInfo.get("Source")));
+		ncfile.addGroupAttribute(null, new Attribute("history", "Level 3 product from Swansea algorithm"));
+		ncfile.addGroupAttribute(null, new Attribute("keywords", "satellite,observation,atmosphere"));
+		ncfile.addGroupAttribute(null, new Attribute("keywords_vocabulary", "NASA Global Change Master Directory (GCMD) Science Keywords"));
+		ncfile.addGroupAttribute(null, new Attribute("standard_name_vocabulary", "NetCDF Climate and Forecast (CF) Metadata Convention version 18"));
+		ncfile.addGroupAttribute(null, new Attribute("license", "ESA CCI Data Policy: free and open access"));
+        ncfile.addGroupAttribute(null, new Attribute("inputfilelist", prodList));
+        //ncfile.addGroupAttribute(null, new Attribute("Units", "degree"));
+        //ncfile.addGroupAttribute(null, new Attribute("node_offset", 1));
     }
 
     private static void createGlobalAttrb(NetcdfFileWriter ncfile, Map<String, String> prodInfo, String ncdfName, DataVersionNumbers version) {

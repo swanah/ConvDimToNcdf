@@ -8,16 +8,21 @@ package akh.convdimtoncdf;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.ProductData.UTC;
 import org.esa.beam.framework.datamodel.TiePointGrid;
 import org.esa.beam.util.Guardian;
 import ucar.ma2.Array;
@@ -25,6 +30,7 @@ import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
+import ucar.nc2.NetcdfFile;
 import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.Variable;
 
@@ -37,6 +43,8 @@ class ProdSinConverterL2 extends BasicConverter {
     private SinProduct sinP;
     private boolean doSyn;
     private boolean doSurfRefl;
+    int aodVersionId = 1;
+    Map<String, String> s3ProdInfo = new HashMap<String, String>();
     
     private final NetcdfVariableProperties pixV = 
             new NetcdfVariableProperties("pixel_number", "Sinusoidal pixel index", "", "1", DataType.INT, 0, 0, null);
@@ -63,13 +71,13 @@ class ProdSinConverterL2 extends BasicConverter {
     };
     
     private final NetcdfVariableProperties aod550V = 
-            new NetcdfVariableProperties("AOD550", "aerosol optical thickness at 550 nm", "atmosphere_optical_thickness_due_to_ambient_aerosol", "1", DataType.FLOAT, 0f, 2f, -999f, "latitude longitude time");
+            new NetcdfVariableProperties("AOD550", "aerosol optical thickness at 550 nm", "atmosphere_optical_thickness_due_to_ambient_aerosol", "1", DataType.FLOAT, 0f, 4f, -999f, "latitude longitude time");
     private final NetcdfVariableProperties aod670V = 
-            new NetcdfVariableProperties("AOD670", "aerosol optical thickness at 670 nm", "atmosphere_optical_thickness_due_to_ambient_aerosol", "1", DataType.FLOAT, 0f, 2f, -999f, "latitude longitude time");
+            new NetcdfVariableProperties("AOD670", "aerosol optical thickness at 670 nm", "atmosphere_optical_thickness_due_to_ambient_aerosol", "1", DataType.FLOAT, 0f, 4f, -999f, "latitude longitude time");
     private final NetcdfVariableProperties aod870V = 
-            new NetcdfVariableProperties("AOD870", "aerosol optical thickness at 870 nm", "atmosphere_optical_thickness_due_to_ambient_aerosol", "1", DataType.FLOAT, 0f, 2f, -999f, "latitude longitude time");
+            new NetcdfVariableProperties("AOD870", "aerosol optical thickness at 870 nm", "atmosphere_optical_thickness_due_to_ambient_aerosol", "1", DataType.FLOAT, 0f, 4f, -999f, "latitude longitude time");
     private final NetcdfVariableProperties aod1600V = 
-            new NetcdfVariableProperties("AOD1600", "aerosol optical thickness at 1600 nm", "atmosphere_optical_thickness_due_to_ambient_aerosol", "1", DataType.FLOAT, 0f, 2f, -999f, "latitude longitude time");
+            new NetcdfVariableProperties("AOD1600", "aerosol optical thickness at 1600 nm", "atmosphere_optical_thickness_due_to_ambient_aerosol", "1", DataType.FLOAT, 0f, 4f, -999f, "latitude longitude time");
 
     private final NetcdfVariableProperties sigAod550V = 
             new NetcdfVariableProperties("AOD550_uncertainty", "Uncertainty on AOT at 550 nm", "", "1", DataType.FLOAT, 0f, 10f, -999f, "latitude longitude time");
@@ -116,7 +124,7 @@ class ProdSinConverterL2 extends BasicConverter {
             new NetcdfVariableProperties("time", "time seconds since 1970-01-01 00:00:00 UTC", "time", "seconds", DataType.INT, new Integer(1), Integer.MAX_VALUE, 0);
 
     
-    String[] sinBandNames = new String[]{
+    final String[] sinBandNames = new String[]{
         timeV.varName,
         aod550V.varName,
         aod670V.varName,
@@ -173,14 +181,23 @@ class ProdSinConverterL2 extends BasicConverter {
         String fname = p.getFileLocation().getPath();
         System.out.println("processing V" + version + " - " + fname);
         sinP = new SinProduct(sinBandNames, p);
+        aodVersionId = (version.equals(DataVersionNumbers.v4_31)) ? 3 : 1;
         doSyn = version.isGE(DataVersionNumbers.vSyn1_0);
-        doSurfRefl = p.containsBand("reflec_surf_nadir_0550_1");
+        doSurfRefl = p.containsBand(String.format("reflec_surf_nadir_0550_%d", aodVersionId));
         binProductToSin(p, sinP);
         sinP.convCellsToArray();
         writeNcdf(ncdfName, sinP, version);
         
     }
 
+    void convertS3(String fname, String ncdfName, S3DataVersionNumbers version) throws IOException {
+        System.out.println("processing V" + version + " - " + fname);
+        doSyn = false;
+        doSurfRefl = false;
+        updateProdInfo(fname);
+        binNcdfToSin(fname, sinP);
+    }
+    
     @Override
     NetcdfFileWriter createNetCdfFile(String ncdfName, Product p, DataVersionNumbers version) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -188,6 +205,69 @@ class ProdSinConverterL2 extends BasicConverter {
 
     @Override
     NetcdfFileWriter createNetCdfFile(String ncdfName, SinProduct sinP, DataVersionNumbers version) {
+        NetcdfFileWriter ncfile4 = null;
+        try {
+            ncfile4 = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, ncdfName);
+            Dimension dimPix  = ncfile4.addDimension(null, "pixel_number", sinP.cellMap.size());
+            //Dimension dimView = ncfile4.addDimension(null, "instrument_view", 2);
+
+            ArrayList<Dimension> pixList = new ArrayList<Dimension>();
+            pixList.add(dimPix);
+            //ArrayList<Dimension> viewList = new ArrayList<Dimension>();
+            //viewList.add(dimView);
+            //ArrayList<Dimension> viewPixList = new ArrayList<Dimension>();
+            //viewPixList.add(dimView);
+            //viewPixList.add(dimPix);
+            
+            createVcdfVar(ncfile4, pixV, pixList);
+            //createVcdfVar(ncfile4, viewV, viewList);
+            createVcdfVar(ncfile4, latV, pixList);
+            createVcdfVar(ncfile4, lonV, pixList);
+            for (int i=0; i<4; i++){
+                createVcdfVar(ncfile4, pixCornerLatV[i], pixList);
+                createVcdfVar(ncfile4, pixCornerLonV[i], pixList);
+            }
+            
+            createVcdfVar(ncfile4, aod550V, pixList);
+            createVcdfVar(ncfile4, aod670V, pixList);
+            createVcdfVar(ncfile4, aod870V, pixList);
+            createVcdfVar(ncfile4, aod1600V, pixList);
+            
+            createVcdfVar(ncfile4, angstromV, pixList);
+            createVcdfVar(ncfile4, fmAodV, pixList);
+            createVcdfVar(ncfile4, dustAodV, pixList);
+            createVcdfVar(ncfile4, absAodV, pixList);
+            createVcdfVar(ncfile4, ssaV, pixList);
+            
+            if (doSurfRefl){
+                createVcdfVar(ncfile4, sreflec550V, pixList);
+                createVcdfVar(ncfile4, sreflec670V, pixList);
+                createVcdfVar(ncfile4, sreflec870V, pixList);
+                createVcdfVar(ncfile4, sreflec1600V, pixList);
+            }
+            createVcdfVar(ncfile4, sigAod550V, pixList);
+            createVcdfVar(ncfile4, sigAod670V, pixList);
+            createVcdfVar(ncfile4, sigAod870V, pixList);
+            createVcdfVar(ncfile4, sigAod1600V, pixList);
+            
+            createVcdfVar(ncfile4, szaV, pixList);
+            createVcdfVar(ncfile4, vzaV, pixList);
+            createVcdfVar(ncfile4, razV, pixList);
+            createVcdfVar(ncfile4, timeV, pixList);
+            createVcdfVar(ncfile4, cldFracV, pixList);
+            createVcdfVar(ncfile4, landFlagV, pixList);
+
+            createGlobalAttrb(ncfile4, sinP, ncdfName, version);
+            ncfile4.create();
+        } catch (IOException ex) {
+            Logger.getLogger(ProdSinConverterL2.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return ncfile4;
+        
+    }
+
+    NetcdfFileWriter createNetCdfFile(String ncdfName, SinProduct sinP, S3DataVersionNumbers version) {
         NetcdfFileWriter ncfile4 = null;
         try {
             ncfile4 = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf4, ncdfName);
@@ -331,6 +411,62 @@ class ProdSinConverterL2 extends BasicConverter {
 		//ncfile.addGroupAttribute(null, new Attribute("geospatial_lon_units", "degrees_east"));         
     }
 
+    void createGlobalAttrb(NetcdfFileWriter ncfile, SinProduct sinP, String ncdfName, S3DataVersionNumbers version) {
+        final SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'", Locale.ENGLISH);
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+        final String currentTime = df.format(new Date());
+        //final String CurrentTime = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss", Locale.ENGLISH).format(new Date());
+        final String StartDate = df.format(sinP.startTime.getAsDate());    //p.getStartTime().format();
+        final String StopDate = df.format(sinP.endTime.getAsDate());
+        final String idStr = new File(ncdfName).getName();
+        ncfile.addGroupAttribute(null, new Attribute("Conventions", "CF-1.6"));
+        ncfile.addGroupAttribute(null, new Attribute("tracking_id", UUID.randomUUID().toString()));
+        ncfile.addGroupAttribute(null, new Attribute("naming_authority", "uk.ac.su.aatsraerosol"));
+        ncfile.addGroupAttribute(null, new Attribute("title", "AARDVARC C3S aerosol product level 2"));
+        ncfile.addGroupAttribute(null, new Attribute("product_version", version.toString()));
+		ncfile.addGroupAttribute(null, new Attribute("summary", "This dataset contains the level-2 aerosol properties products from SLSTR satellite observations. Data are processed by Swansea algorithm"));
+		ncfile.addGroupAttribute(null, new Attribute("id", idStr));
+        ncfile.addGroupAttribute(null, new Attribute("sensor", "SLSTR"));
+        ncfile.addGroupAttribute(null, new Attribute("platform", "SENTINEL-S3A"));
+        ncfile.addGroupAttribute(null, new Attribute("resolution", "10km x 10km"));
+        ncfile.addGroupAttribute(null, new Attribute("projection", "sinusoidal [neq = "+sinP.proj.nEquator+"]"));
+		ncfile.addGroupAttribute(null, new Attribute("cdm_data_type", "Swath"));
+        ncfile.addGroupAttribute(null, new Attribute("cell", sinP.nCells));
+        ncfile.addGroupAttribute(null, new Attribute("inputFileList", sinP.getProductListAsString())); //TODO: inputFileList should be blank space and carriage return separated 
+        ncfile.addGroupAttribute(null, new Attribute("time_coverage_start", StartDate));
+        ncfile.addGroupAttribute(null, new Attribute("time_coverage_end", StopDate));
+        //ncfile.addGroupAttribute(null, new Attribute("time_coverage_duration", "P1D"));
+		//ncfile.addGroupAttribute(null, new Attribute("time_coverage_resolution", "P1D"));
+		ncfile.addGroupAttribute(null, new Attribute("geospatial_lat_min", sinP.minLat));
+		ncfile.addGroupAttribute(null, new Attribute("geospatial_lat_max", sinP.maxLat));
+		ncfile.addGroupAttribute(null, new Attribute("geospatial_lon_min", sinP.minLon));
+		ncfile.addGroupAttribute(null, new Attribute("geospatial_lon_max", sinP.maxLon));
+        ncfile.addGroupAttribute(null, new Attribute("date_created", currentTime));
+		ncfile.addGroupAttribute(null, new Attribute("project", "Climate Change Initiative - European Space Agency"));
+        ncfile.addGroupAttribute(null, new Attribute("references", "http://www.esa-aerosol-cci.org"));
+		ncfile.addGroupAttribute(null, new Attribute("creator_name", "College of Science, Swansea University"));
+		ncfile.addGroupAttribute(null, new Attribute("creator_url", "http://www.swan.ac.uk/staff/academic/environmentsociety/geography/northpeter/"));
+		ncfile.addGroupAttribute(null, new Attribute("creator_email", "p.r.j.north@swansea.ac.uk, a.heckel@swansea.ac.uk"));
+        ncfile.addGroupAttribute(null, new Attribute("source", sinP.source));
+		ncfile.addGroupAttribute(null, new Attribute("keywords", "satellite,observation,atmosphere"));
+		ncfile.addGroupAttribute(null, new Attribute("keywords_vocabulary", "NASA Global Change Master Directory (GCMD) Science Keywords"));
+		//ncfile.addGroupAttribute(null, new Attribute("comment", "These data were produced at ESA CCI as part of the ESA Aerosol CCI project."));
+		ncfile.addGroupAttribute(null, new Attribute("standard_name_vocabulary", "NetCDF Climate and Forecast (CF) Metadata Convention version 18"));
+		ncfile.addGroupAttribute(null, new Attribute("license", "ESA CCI Data Policy: free and open access"));
+        //ncfile.addGroupAttribute(null, new Attribute("product", prodName));
+        //ncfile.addGroupAttribute(null, new Attribute("originator", "SU"));
+        //ncfile.addGroupAttribute(null, new Attribute("originator_long", "Swansea University"));
+        //ncfile.addGroupAttribute(null, new Attribute("originator_url", "http://www.swan.ac.uk/staff/academic/environmentsociety/geography/northpeter/"));
+        //ncfile.addGroupAttribute(null, new Attribute("email", "p.r.j.north@swansea.ac.uk; a.heckel@swansea.ac.uk"));
+		//ncfile.addGroupAttribute(null, new Attribute("institution", "Swansea University"));
+		//ncfile.addGroupAttribute(null, new Attribute("history", "Level 2 product from Swansea algorithm"));
+		//ncfile.addGroupAttribute(null, new Attribute("date_created", "20120918T163335Z"));
+		//ncfile.addGroupAttribute(null, new Attribute("geospatial_vertical_min", "0 km"));
+		//ncfile.addGroupAttribute(null, new Attribute("geospatial_vertical_max", "0 km"));
+		//ncfile.addGroupAttribute(null, new Attribute("geospatial_lat_units", "degrees_north"));
+		//ncfile.addGroupAttribute(null, new Attribute("geospatial_lon_units", "degrees_east"));         
+    }
+
     @Override
     void createVcdfVar(NetcdfFileWriter ncfile, NetcdfVariableProperties var, ArrayList<Dimension> dimList) {
         Attribute longNameAtt = null;
@@ -426,31 +562,31 @@ class ProdSinConverterL2 extends BasicConverter {
                 vaaFwdTpg = p.getTiePointGrid("view_azimuth_fward");
             }
             
-            Band aotNdBand = p.getBand("aot_nd_2");
-            Band aotUncNdBand = p.getBand("aot_brent_nd_1");
-            Band fotB = p.getBand("frac_fine_total_1");
+            Band aotNdBand = p.getBand(String.format("aot_nd_%d", aodVersionId+1));
+            Band aotUncNdBand = p.getBand(String.format("aot_brent_nd_%d", aodVersionId));
+            Band fotB = p.getBand(String.format("frac_fine_total_%d", aodVersionId));
             Band wofB = p.getBand("frac_weakAbs_fine");
             Band docB = p.getBand("frac_dust_coarse");
             Band cldFracB = p.getBand("cld_frac");
             Band aotFlagsB = p.getBand("aot_flags");
             
-            Band absAotB = p.getBand("aaot_nd_1");
+            Band absAotB = p.getBand(String.format("aaot_nd_%d", aodVersionId));
             Band ssaB    = p.getBand("ssa");
 
             //Band sAot0550B = p.getBand("aot_nd_0550_1");
-            Band sAot0670B = p.getBand("aot_nd_0670_1");
-            Band sAot0870B = p.getBand("aot_nd_0870_1");
-            Band sAot1600B = p.getBand("aot_nd_1600_1");
+            Band sAot0670B = p.getBand(String.format("aot_nd_0670_%d", aodVersionId));
+            Band sAot0870B = p.getBand(String.format("aot_nd_0870_%d", aodVersionId));
+            Band sAot1600B = p.getBand(String.format("aot_nd_1600_%d", aodVersionId));
 
             Band sref0555B = null;
             Band sref0659B = null;
             Band sref0865B = null;
             Band sref1610B = null;
             if (doSurfRefl){
-                sref0555B = p.getBand("reflec_surf_nadir_0550_1");
-                sref0659B = p.getBand("reflec_surf_nadir_0670_1");
-                sref0865B = p.getBand("reflec_surf_nadir_0870_1");
-                sref1610B = p.getBand("reflec_surf_nadir_1600_1");
+                sref0555B = p.getBand(String.format("reflec_surf_nadir_0550_%d", aodVersionId));
+                sref0659B = p.getBand(String.format("reflec_surf_nadir_0670_%d", aodVersionId));
+                sref0865B = p.getBand(String.format("reflec_surf_nadir_0870_%d", aodVersionId));
+                sref1610B = p.getBand(String.format("reflec_surf_nadir_1600_%d", aodVersionId));
             }
             
             float[] lat = new float[pWidth];
@@ -579,7 +715,166 @@ class ProdSinConverterL2 extends BasicConverter {
         }
     }
 
+    private void binNcdfToSin(String fname, SinProduct sinP) {
+        NetcdfFile ncF = null;
+        try {
+            ncF = NetcdfFile.open(fname);
+            
+            int pWidth = getNcdfRasterWidth(ncF);
+            int pHeight = getNcdfRasterHeight(ncF);
+
+            long startMilliSec1970 = utcToMilliSec1970(getNcdfTime(ncF, "@time_coverage_start"));
+            long endSec1970 = utcToMilliSec1970(getNcdfTime(ncF, "@time_coverage_end"));
+            long millisecPerLine = (endSec1970 - startMilliSec1970) / pHeight;
+            
+            double[] lat = getVarAsDoubleArr(ncF, "latitude");
+            double[] lon = getVarAsDoubleArr(ncF, "longitude");
+            String[] aodNames = new String[]{"AOD_0550", "AOD_0659", "AOD_0865", "AOD_1610", "AOD_2250"};
+            String[] aodUncNames = new String[]{"AOD_0550_uncertainty", "AOD_0659_uncertainty", "AOD_0865_uncertainty", "AOD_1610_uncertainty", "AOD_2250_uncertainty"};
+            String[] sdrNames = new String[]{"S1_SDR_n", "S2_SDR_n", "S3_SDR_n", "S5_SDR_n", "S6_SDR_n"};
+            float[][] aod = new float[aodNames.length][];
+            float[][] aodUnc = new float[aodNames.length][];
+            float[][] sdr = new float[aodNames.length][];
+            for (int i = 0; i<aodNames.length; i++){
+                aod[i] = getVarAsFloatArr(ncF, aodNames[i]);
+                aodUnc[i] = getVarAsFloatArr(ncF, aodUncNames[i]);
+                sdr[i] = getShortVarAsFloatArr(ncF, sdrNames[i]);
+            }
+            float[] ang870  = getVarAsFloatArr(ncF, "ANG550_870");
+            float[] fineAod = getVarAsFloatArr(ncF, "AAOD550");
+            float[] absAod  = getVarAsFloatArr(ncF, "FM_AOD550");
+            float[] dustAod = getVarAsFloatArr(ncF, "D_AOD550");
+            float[] ssa     = getVarAsFloatArr(ncF, "SSA550");
+
+            double[] szaNad = getVarAsDoubleArr(ncF, "solar_zenith_tn");
+            double[] vzaNad = getVarAsDoubleArr(ncF, "sat_zenith_tn");
+            float[] razNad   = getVarAsFloatArr(ncF, "rel_azimuth_an");
+            //double[] razF   = getVarAsDoubleArr(ncF, "rel_azimuth_ao");
+            
+            int pixSec1970 = 0;
+            float[] vals = new float[sinBandNames.length];
+            for (int iy = 0; iy < pHeight; iy++) {
+                if (iy%100 == 9) {
+                    System.out.printf("L2 processing %5.1f%%\r", (float)(iy)/(float)(pHeight)*100f);
+                    System.out.flush();
+                }
+                pixSec1970 = (int)((startMilliSec1970 + millisecPerLine * iy) / 1000);
+                int idx;
+                for (int ixx=0; ixx<pWidth; ixx++){
+                    idx = iy * pWidth + ixx;
+                    if (aod[0][idx] > 0){
+                        vals[0] = pixSec1970;
+                        vals[1] = aod[0][idx];
+                        vals[2] = aod[1][idx];
+                        vals[3] = aod[2][idx];
+                        vals[4] = aod[3][idx];
+                        
+                        vals[5] = ang870[idx];
+                        vals[6] = fineAod[idx];
+                        vals[7] = dustAod[idx];
+                        vals[8] = absAod[idx];
+                        vals[9] = ssa[idx];
+                        
+                        vals[10] = sdr[0][idx];
+                        vals[11] = sdr[1][idx];
+                        vals[12] = sdr[2][idx];
+                        vals[13] = sdr[3][idx];
+
+                        vals[14] = aodUnc[0][idx];
+                        vals[15] = aodUnc[1][idx];
+                        vals[16] = aodUnc[2][idx];
+                        vals[17] = aodUnc[3][idx];
+                        
+                        vals[18] = (float) szaNad[idx];
+                        vals[19] = (float) vzaNad[idx];
+                        vals[20] = (float) razNad[idx];
+                        vals[21] = 0;
+                        vals[22] = 0;
+                        if (sinBandNames.length != 23){
+                            throw new IllegalStateException("mismatch in assigned and declared vals!");
+                        }
+                        sinP.add((float)lat[idx], (float)lon[idx], vals);
+                    }
+                }
+            }
+            
+            System.out.printf("L2 processing done                     \n");
+            
+        } catch (IOException ex) {
+            Logger.getLogger(ProdSinConverterL2.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RuntimeException ex) {
+            Logger.getLogger(ProdSinConverterL2.class.getName()).log(Level.SEVERE, "Error: reading " + fname, ex);
+        } finally {
+            if (ncF != null) {
+                try {
+                    ncF.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(ProdSinConverterL2.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+    }
+
     private void writeNcdf(String ncdfName, SinProduct sinP, DataVersionNumbers version) {
+        pixV.validRange.setInt(1, sinP.nCells);
+        NetcdfFileWriter ncFile = createNetCdfFile(ncdfName, sinP, version);
+        Guardian.assertNotNull("ncFile null", ncFile);
+        try {
+            ncFile.write(pixV.ncV, Array.factory(genIdxArr(sinP.nCells)));
+            //ncFile.write(viewV.ncV, Array.factory(new int[]{0, 1}));
+            ncFile.write(latV.ncV, Array.factory(sinP.latArr[0]));
+            ncFile.write(lonV.ncV, Array.factory(sinP.lonArr[0]));
+            for (int i=0; i<4; i++){
+                ncFile.write(pixCornerLatV[i].ncV, Array.factory(sinP.latArr[i+1]));
+                ncFile.write(pixCornerLonV[i].ncV, Array.factory(sinP.lonArr[i+1]));
+            }
+            
+            ncFile.write(timeV.ncV,    Array.factory(fArrToIntArr(sinP.bandsArr[0])));
+            
+            ncFile.write(aod550V.ncV,  Array.factory(sinP.bandsArr[1]));
+            ncFile.write(aod670V.ncV,  Array.factory(sinP.bandsArr[2]));
+            ncFile.write(aod870V.ncV,  Array.factory(sinP.bandsArr[3]));
+            ncFile.write(aod1600V.ncV, Array.factory(sinP.bandsArr[4]));
+
+            ncFile.write(angstromV.ncV, Array.factory(sinP.bandsArr[5]));
+            ncFile.write(fmAodV.ncV,    Array.factory(sinP.bandsArr[6]));
+            ncFile.write(dustAodV.ncV,  Array.factory(sinP.bandsArr[7]));
+            ncFile.write(absAodV.ncV,   Array.factory(sinP.bandsArr[8]));
+            ncFile.write(ssaV.ncV,      Array.factory(sinP.bandsArr[9]));
+            
+            if (doSurfRefl){
+                ncFile.write(sreflec550V.ncV,  Array.factory(sinP.bandsArr[10]));
+                ncFile.write(sreflec670V.ncV,  Array.factory(sinP.bandsArr[11]));
+                ncFile.write(sreflec870V.ncV,  Array.factory(sinP.bandsArr[12]));
+                ncFile.write(sreflec1600V.ncV, Array.factory(sinP.bandsArr[13]));
+            }
+            
+            ncFile.write(sigAod550V.ncV,  Array.factory(sinP.bandsArr[14]));
+            ncFile.write(sigAod670V.ncV,  Array.factory(sinP.bandsArr[15]));
+            ncFile.write(sigAod870V.ncV,  Array.factory(sinP.bandsArr[16]));
+            ncFile.write(sigAod1600V.ncV, Array.factory(sinP.bandsArr[17]));
+            
+            ncFile.write(szaV.ncV, Array.factory(sinP.bandsArr[18]));
+            ncFile.write(vzaV.ncV, Array.factory(sinP.bandsArr[19]));
+            ncFile.write(razV.ncV, Array.factory(sinP.bandsArr[20]));
+            
+            ncFile.write(cldFracV.ncV, Array.factory(sinP.bandsArr[21]));
+            ncFile.write(landFlagV.ncV, Array.factory(fArrToIntArr(sinP.bandsArr[22])));
+        } catch (IOException ex) {
+            Logger.getLogger(ProdSinConverterL2.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidRangeException ex) {
+            Logger.getLogger(ProdSinConverterL2.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                ncFile.close();
+            } catch (IOException ex) {
+                Logger.getLogger(ProdSinConverterL2.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    void writeS3Ncdf(String ncdfName, S3DataVersionNumbers version) {
+        sinP.convCellsToArray();
         pixV.validRange.setInt(1, sinP.nCells);
         NetcdfFileWriter ncFile = createNetCdfFile(ncdfName, sinP, version);
         Guardian.assertNotNull("ncFile null", ncFile);
@@ -653,6 +948,105 @@ class ProdSinConverterL2 extends BasicConverter {
             ia[i] = (int)(fa[i]+0.5);
         }
         return ia;
+    }
+
+    void initAsS3Ncdf(String fname) throws IOException {
+        sinP = new SinProduct(this.sinBandNames);
+        //updateProdInfo(fname);
+    }
+
+    private void updateProdInfo(String fname) throws IOException {
+        NetcdfFile ncF = NetcdfFile.open(fname);
+        ProductData.UTC pStartTime = getNcdfTime(ncF, "@time_coverage_start");
+        if (sinP.startTime == null || pStartTime.getMJD() < sinP.startTime.getMJD()) {
+            sinP.startTime = pStartTime;
+        }
+        ProductData.UTC pEndTime = getNcdfTime(ncF, "@time_coverage_end");
+        if (sinP.endTime == null || pEndTime.getMJD() > sinP.endTime.getMJD()) {
+            sinP.endTime = pEndTime;
+        }
+
+        if (sinP.productList == null) {
+            sinP.productList = new ArrayList<String>();
+        }
+        sinP.productList.add(getNcdfId(ncF));
+
+        if (sinP.source == null || sinP.source.isEmpty()){
+            Attribute att = ncF.findGlobalAttribute("source");
+            sinP.source = att.getStringValue();
+        }
+        ncF.close();
+    }
+
+    private ProductData.UTC getNcdfTime(NetcdfFile ncF, String attStr) {
+        Attribute att = ncF.findAttribute(attStr);
+        ProductData.UTC utcTime = null;
+        try {
+            String timeStr = att.getStringValue();
+            if (timeStr.endsWith("Z")) {
+                timeStr = timeStr.substring(0, timeStr.length()-1);
+            }
+            utcTime = ProductData.UTC.parse(timeStr, "yyyyMMdd'T'HHmmss");
+        } catch (ParseException ex) {
+            Logger.getLogger(DataGridder.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return utcTime;
+    }
+
+    private String getNcdfId(NetcdfFile ncF) {
+        Attribute idAtt = ncF.findAttribute("@id");
+        String idS;
+        if (idAtt == null) {
+            Attribute att = ncF.findAttribute("@inputFileList");
+            idS = att.getStringValue();
+        }
+        else {
+            idS = idAtt.getStringValue();
+        }
+        return idS;
+    }
+
+    private int getNcdfRasterWidth(NetcdfFile ncF) {
+        Dimension dim = ncF.findDimension("columns");
+        return dim.getLength();
+    }
+
+    private int getNcdfRasterHeight(NetcdfFile ncF) {
+        Dimension dim = ncF.findDimension("rows");
+        return dim.getLength();
+    }
+
+    public float[] getVarAsFloatArr(NetcdfFile ncF, String varName) throws IOException {
+        Variable var = ncF.findVariable(null, varName);
+        float[] arr = (float[]) var.read().copyTo1DJavaArray();
+        return arr;
+    }
+
+    public double[] getVarAsDoubleArr(NetcdfFile ncF, String varName) throws IOException {
+        Variable var = ncF.findVariable(null, varName);
+        double[] arr = (double[]) var.read().copyTo1DJavaArray();
+        return arr;
+    }
+
+    public float[] getShortVarAsFloatArr(NetcdfFile ncF, String varName) throws IOException {
+        Variable var = ncF.findVariable(null, varName);
+        short[] sArr = (short[]) var.read().copyTo1DJavaArray();
+        Attribute att = var.findAttribute("add_offset");
+        double off = att.getNumericValue().doubleValue();
+        att = var.findAttribute("scale_factor");
+        double scale = att.getNumericValue().doubleValue();
+        att = var.findAttribute("_FillValue");
+        short noData = att.getNumericValue().shortValue();
+        float[] arr = new float[sArr.length];
+        for (int i = 0; i < sArr.length; i++){
+            if (sArr[i] == noData) {
+                arr[i] = -1;
+            }
+            else {
+                arr[i] = (float) (scale * (double)sArr[i] + off);
+            }
+        }
+        return arr;
     }
 
 }

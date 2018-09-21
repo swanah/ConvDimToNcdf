@@ -5,12 +5,18 @@
 package akh.convdimtoncdf;
 
 import java.io.*;
+import java.text.ParseException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.datamodel.ProductData.UTC;
 import org.esa.beam.framework.datamodel.TiePointGrid;
+import ucar.nc2.Attribute;
+import ucar.nc2.Dimension;
+import ucar.nc2.NetcdfFile;
+import ucar.nc2.Variable;
 
 /**
  *
@@ -48,8 +54,10 @@ public class DataGridder {
     private UTC startTime;
     private UTC endTime;
     private String products;
+    private String source;
     private boolean doSyn;
     private boolean doSurfRefl;
+    private int aodVersionId;
     
     public DataGridder() throws Exception {
         this(false);
@@ -120,6 +128,10 @@ public class DataGridder {
         return products;
     }
 
+    public String getSourceStr() {
+        return source;
+    }
+
     public UTC getStartTime() {
         return startTime;
     }
@@ -132,8 +144,103 @@ public class DataGridder {
         return doSurfRefl;
     }
 
+    void binNcdfToGridV4(String fname, S3DataVersionNumbers version) throws IOException {
+        doSurfRefl = false;
+        NetcdfFile ncF = NetcdfFile.open(fname);
+        String pname = getNcdfId(ncF);
+        System.out.println("binning V" + version + " - " + fname);
+        UTC pStartTime = getNcdfTime(ncF, "@time_coverage_start");
+        if (pStartTime.getMJD() < startTime.getMJD()) startTime = pStartTime;
+        UTC pEndTime = getNcdfTime(ncF, "@time_coverage_end");
+        if (pEndTime.getMJD() > endTime.getMJD()) endTime = pEndTime;
+        if (products.length() == 0) {
+            products = pname;
+        } else {
+            products += " \n" + pname;
+        }
+        Attribute att = ncF.findGlobalAttribute("source");
+        source = att.getStringValue();
+        int pWidth = getNcdfRasterWidth(ncF);
+        int pHeight = getNcdfRasterHeight(ncF);
+
+        double[] lat = getVarAsDoubleArr(ncF, "latitude");
+        double[] lon = getVarAsDoubleArr(ncF, "longitude");
+        String[] aodNames = new String[]{"AOD_0550", "AOD_0659", "AOD_0865", "AOD_1610", "AOD_2250"};
+        String[] aodUncNames = new String[]{"AOD_0550_uncertainty", "AOD_0659_uncertainty", "AOD_0865_uncertainty", "AOD_1610_uncertainty", "AOD_2250_uncertainty"};
+        String[] sdrNames = new String[]{"S1_SDR_n", "S2_SDR_n", "S3_SDR_n", "S5_SDR_n", "S6_SDR_n"};
+        float[][] aod = new float[aodNames.length][];
+        float[][] aodUnc = new float[aodNames.length][];
+        float[][] sdr = new float[aodNames.length][];
+        for (int i = 0; i<aodNames.length; i++){
+            aod[i] = getVarAsFloatArr(ncF, aodNames[i]);
+            aodUnc[i] = getVarAsFloatArr(ncF, aodUncNames[i]);
+            if (doSurfRefl){
+                sdr[i] = getVarAsFloatArr(ncF, sdrNames[i]);
+            }
+        }
+        float[] ang870  = getVarAsFloatArr(ncF, "ANG550_870");
+        float[] fineAod = getVarAsFloatArr(ncF, "AAOD550");
+        float[] absAod  = getVarAsFloatArr(ncF, "FM_AOD550");
+        float[] dustAod = getVarAsFloatArr(ncF, "D_AOD550");
+        float[] ssa     = getVarAsFloatArr(ncF, "SSA550");
+        
+        //float[] szaNad = getVarAsFloatArr(ncF, "solar_zenith_tn");
+        //float[] vzaNad = getVarAsFloatArr(ncF, "sat_zenith_tn");
+        //float[] razN   = getVarAsFloatArr(ncF, "rel_azimuth_an");
+        //float[] razF   = getVarAsFloatArr(ncF, "rel_azimuth_ao");
+        
+        int ilat;
+        int ilon;
+        int idx;
+        for (int iy=0; iy<pHeight; iy++){
+            for (int ix=0; ix<pWidth; ix++){
+                idx = iy * pWidth + ix;
+                if (aod[0][idx]>0){
+                    ilat = lat2idx(lat[idx]);
+                    ilon = lon2idx(lon[idx]);
+
+                    countGrid[ilat][ilon]++;
+
+                    computeRunningMeanVar(aod550Grid, countGrid, ilat, ilon, aod[0][idx]);
+                    computeRunningMeanVar(aod670Grid, countGrid, ilat, ilon, aod[1][idx]);
+                    computeRunningMeanVar(aod870Grid, countGrid, ilat, ilon, aod[2][idx]);
+                    computeRunningMeanVar(aod1600Grid, countGrid, ilat, ilon, aod[3][idx]);
+
+                    computeRunningMeanVarMinMax(sigAod550Grid, countGrid, ilat, ilon, aodUnc[0][idx]);
+                    computeRunningMeanVarMinMax(sigAod659Grid, countGrid, ilat, ilon, aodUnc[1][idx]);
+                    computeRunningMeanVarMinMax(sigAod865Grid, countGrid, ilat, ilon, aodUnc[2][idx]);
+                    computeRunningMeanVarMinMax(sigAod1600Grid, countGrid, ilat, ilon, aodUnc[3][idx]);
+
+                    //computeRunningMeanVar(angstrom659Grid, countGrid, ilat, ilon, (float)(Math.log(aotNd[ix] / sAot0659[ix]) * angWvlLog659));
+                    computeRunningMeanVar(angstrom865Grid, countGrid, ilat, ilon, ang870[idx]);
+
+                    computeRunningMeanVar(fineModeAodGrid, countGrid, ilat, ilon, fineAod[idx]);
+                    computeRunningMeanVar(absModeAodGrid,  countGrid, ilat, ilon, absAod[idx]);
+                    computeRunningMeanVar(dustModeAodGrid, countGrid, ilat, ilon, dustAod[idx]);
+                    computeRunningMeanVar(ssaGrid, countGrid, ilat, ilon, ssa[idx]);
+
+                    if (doSurfRefl) {
+                        computeRunningMeanVar(rsurf0555Grid, countGrid, ilat, ilon, sdr[0][idx]);
+                        computeRunningMeanVar(rsurf0659Grid, countGrid, ilat, ilon, sdr[0][idx]);
+                        computeRunningMeanVar(rsurf0865Grid, countGrid, ilat, ilon, sdr[0][idx]);
+                        computeRunningMeanVar(rsurf1600Grid, countGrid, ilat, ilon, sdr[0][idx]);
+                    }
+                    //computeRunningMeanVar(cldFracGrid, countGrid, ilat, ilon, cldFrac[ix]);
+                    //computeRunningMeanVar(landFracGrid, countGrid, ilat, ilon, (aotFlags[ix]&1));
+
+                    //computeRunningMeanVar(szaGrid, countGrid, ilat, ilon, (szaNad[idx]), 0);
+                    //computeRunningMeanVar(vzaGrid, countGrid, ilat, ilon, (vzaNad[idx]), 0);
+                    //computeRunningMeanVar(razGrid, countGrid, ilat, ilon, razN[idx], razF[idx]);
+                }
+            }
+        }
+                
+        ncF.close();
+    }
+
     public void binToGridV4(Product p, DataVersionNumbers version){
-        doSurfRefl = p.containsBand("reflec_surf_nadir_0550_1");
+        aodVersionId = (version.equals(DataVersionNumbers.v4_31)) ? 3 : 1;
+        doSurfRefl = p.containsBand(String.format("reflec_surf_nadir_0550_%d", aodVersionId));
         doSyn = version.isGE(DataVersionNumbers.vSyn1_0);
         String fname = p.getFileLocation().getPath();
         String pname = p.getFileLocation().getName();
@@ -186,31 +293,31 @@ public class DataGridder {
                 vaaFwdTpg = p.getTiePointGrid("view_azimuth_fward");
             }
 
-            Band aotNdBand = p.getBand("aot_nd_2");
-            Band aotUncNdBand = p.getBand("aot_brent_nd_1");
-            Band fotB = p.getBand("frac_fine_total_1");
+            Band aotNdBand = p.getBand(String.format("aot_nd_%d", aodVersionId+1));
+            Band aotUncNdBand = p.getBand(String.format("aot_brent_nd_%d", aodVersionId));
+            Band fotB = p.getBand(String.format("frac_fine_total_%d", aodVersionId));
             Band wofB = p.getBand("frac_weakAbs_fine");
             Band docB = p.getBand("frac_dust_coarse");
             Band cldFracB = p.getBand("cld_frac");
             Band aotFlagsB = p.getBand("aot_flags");
 
-            Band absAotB = p.getBand("aaot_nd_1");
+            Band absAotB = p.getBand(String.format("aaot_nd_%d", aodVersionId));
             Band ssaB = p.getBand("ssa");
 
             //Band sAot0550B = p.getBand("aot_nd_0550_1");
-            Band sAot0670B = p.getBand("aot_nd_0670_1");
-            Band sAot0870B = p.getBand("aot_nd_0870_1");
-            Band sAot1600B = p.getBand("aot_nd_1600_1");
+            Band sAot0670B = p.getBand(String.format("aot_nd_0670_%d", aodVersionId));
+            Band sAot0870B = p.getBand(String.format("aot_nd_0870_%d", aodVersionId));
+            Band sAot1600B = p.getBand(String.format("aot_nd_1600_%d", aodVersionId));
 
             Band sref0555B = null;
             Band sref0659B = null;
             Band sref0865B = null;
             Band sref1610B = null;
             if (doSurfRefl){
-                sref0555B = p.getBand("reflec_surf_nadir_0550_1");
-                sref0659B = p.getBand("reflec_surf_nadir_0670_1");
-                sref0865B = p.getBand("reflec_surf_nadir_0870_1");
-                sref1610B = p.getBand("reflec_surf_nadir_1600_1");
+                sref0555B = p.getBand(String.format("reflec_surf_nadir_0550_%d", aodVersionId));
+                sref0659B = p.getBand(String.format("reflec_surf_nadir_0670_%d", aodVersionId));
+                sref0865B = p.getBand(String.format("reflec_surf_nadir_0870_%d", aodVersionId));
+                sref1610B = p.getBand(String.format("reflec_surf_nadir_1600_%d", aodVersionId));
             }
             float[] lat = new float[pWidth];
             float[] lon = new float[pWidth];
@@ -807,6 +914,20 @@ public class DataGridder {
         return ilat;
     }
 
+    private int lon2idx(double lon) {
+        int ilon;
+        ilon = (int) Math.floor(lon) + 180;
+        if (ilon == 360) ilon = 359;
+        return ilon;
+    }
+
+    private int lat2idx(double lat) {
+        int ilat;
+        ilat = (int) Math.floor(lat) + 90;
+        if (ilat == 180) ilat = 179;
+        return ilat;
+    }
+
     private float idx2lat(int ilat) {
         float lat;
         lat = -89.5f + ilat;
@@ -818,5 +939,56 @@ public class DataGridder {
         lon = -179.5f + ilon;
         return lon;
     }
+
+    private String getNcdfId(NetcdfFile ncF) {
+        Attribute idAtt = ncF.findAttribute("@id");
+        String idS;
+        if (idAtt == null) {
+            Attribute att = ncF.findAttribute("@inputFileList");
+            idS = att.getStringValue();
+        }
+        else {
+            idS = idAtt.getStringValue();
+        }
+        return idS;
+    }
+
+    private UTC getNcdfTime(NetcdfFile ncF, String attStr) {
+        Attribute att = ncF.findAttribute(attStr);
+        UTC utcTime = null;
+        try {
+            String timeStr = att.getStringValue();
+            if (timeStr.endsWith("Z")) {
+                timeStr = timeStr.substring(0, timeStr.length()-1);
+            }
+            utcTime = ProductData.UTC.parse(timeStr, "yyyyMMdd'T'HHmmss");
+        } catch (ParseException ex) {
+            Logger.getLogger(DataGridder.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return utcTime;
+    }
+
+    private int getNcdfRasterWidth(NetcdfFile ncF) {
+        Dimension dim = ncF.findDimension("columns");
+        return dim.getLength();
+    }
+
+    private int getNcdfRasterHeight(NetcdfFile ncF) {
+        Dimension dim = ncF.findDimension("rows");
+        return dim.getLength();
+    }
+
+    public float[] getVarAsFloatArr(NetcdfFile ncF, String varName) throws IOException {
+        Variable var = ncF.findVariable(null, varName);
+        float[] arr = (float[]) var.read().copyTo1DJavaArray();
+        return arr;
+    }
+
+    public double[] getVarAsDoubleArr(NetcdfFile ncF, String varName) throws IOException {
+        Variable var = ncF.findVariable(null, varName);
+        double[] arr = (double[]) var.read().copyTo1DJavaArray();
+        return arr;
+    }
+
 
 }

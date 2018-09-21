@@ -5,7 +5,7 @@
     <groupId>akh</groupId>
     <artifactId>convDimToNcdf</artifactId>
     <packaging>jar</packaging>
-    <version>0.59</version>
+    <version>0.61</version>
     <name>convDimToNcdf</name>
     <url>http://maven.apache.org</url>
 
@@ -135,5 +135,7 @@
         v0.56 : adjusted L3Gridder propagate Uncertainty
         v0.57 : added SynV1.1 and 1.2
         v0.58 : inputFilelist: filenames dim -&gt; N1
-        v0.59 : implement Schutgens Aerocom ncdf format</description>
+        v0.59 : implement Schutgens Aerocom ncdf format
+        v0.60 : implement S3 AOD
+        v0.61 : include CCI bridging v43a - AOD constraint 1</description>
 </project>

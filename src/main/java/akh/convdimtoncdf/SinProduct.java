@@ -7,11 +7,13 @@
 package akh.convdimtoncdf;
 
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.esa.beam.framework.datamodel.GeoPos;
 import org.esa.beam.framework.datamodel.PixelPos;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
 
 /**
  *
@@ -28,6 +30,14 @@ public class SinProduct {
     float[][] latArr, lonArr;
     float[][] bandsArr;
     float minLon=180, minLat=90, maxLon=-180, maxLat=-90;
+    ProductData.UTC startTime;
+    ProductData.UTC endTime;
+    ArrayList<String> productList;
+    String source;
+    
+    SinProduct(String bandNames[]) {
+        this(new SinProjection(), bandNames, null); //defaults to 4008 cells at equator
+    }
     
     SinProduct(String bandNames[], Product p) {
         this(new SinProjection(), bandNames, p); //defaults to 4008 cells at equator
@@ -46,6 +56,20 @@ public class SinProduct {
     }
 
 
+    public String getProductListAsString() {
+        String s = null;
+        for (String p : productList){
+            if (s == null || s.isEmpty()){
+                s = p;
+            }
+            else {
+                s += " \n" + p;
+            }
+        }
+        return s;
+    }
+    
+    
     /*    void binToGrid(GeoPos gp, float val){
         PixelPos pp = proj.getPixelPos(gp, null);
         int index = (int)pp.x + (int)pp.y * proj.nEquator;
@@ -66,6 +90,7 @@ public class SinProduct {
             minLat = Math.min(minLat, lat);
             maxLat = Math.max(maxLat, lat);
         }
+        nCells = cellMap.size();
     }
     
     void convCellsToArray(){

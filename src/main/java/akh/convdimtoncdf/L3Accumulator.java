@@ -86,8 +86,8 @@ class L3Accumulator {
     }
 
     void initAccumulator(NetcdfFile ncFile) {
-        dimLst = new ArrayList<Dimension>(ncFile.getDimensions());
-        varLst = new ArrayList<Variable>(ncFile.getVariables());
+        dimLst = ncFile.getDimensions(); //new ArrayList<Dimension>(ncFile.getDimensions());
+        varLst = ncFile.getVariables();  //new ArrayList<Variable>(ncFile.getVariables());
         Iterator<Variable> vIter = varLst.iterator();
         while (vIter.hasNext()) {
             String vName = vIter.next().getShortName();
@@ -150,15 +150,17 @@ class L3Accumulator {
 
     void add(File netcdfFile) {
         float aod, unc;
+        NetcdfFile ncFile = null;
         try {
-            NetcdfFile ncFile = NetcdfFile.open(netcdfFile.getPath());
+            ncFile = NetcdfFile.open(netcdfFile.getPath());
             if (needsInit) {
                 initAccumulator(ncFile);
             }
             setStartStopDate(ncFile.getGlobalAttributes());
             System.out.println(startDate + " --> " + endDate);
             if (doDaily) {
-                inputFileLst.addAll(getInputFilenames(globalAttLst));
+                //inputFileLst.addAll(getInputFilenames(ncFile.getGlobalAttributes()));
+                inputFileLst.add(netcdfFile.getName());
             }
             else {
                 inputFileLst.add(netcdfFile.getName());
@@ -207,6 +209,14 @@ class L3Accumulator {
             }
         } catch (IOException ex) {
             Logger.getLogger(L3Accumulator.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (ncFile != null) {
+                try {
+                    ncFile.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(L3Accumulator.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
     }
 
@@ -344,7 +354,8 @@ class L3Accumulator {
             while (iter.hasNext()) {
                 Attribute a = iter.next();
                 if (a.getShortName().equals("inputfilelist")) {
-                    newAtt = new Attribute("inputfilelist", inputFileString);
+                    //newAtt = new Attribute("inputfilelist", inputFileString);
+                    newAtt = new Attribute("inputfilelist", inputFileLst);
                     iter.set(newAtt);
                 }
                 if (a.getShortName().equals("product")) {
@@ -370,6 +381,9 @@ class L3Accumulator {
                     dateStr = sdf[1].format(endDate);
                     newAtt = new Attribute("stopdate", dateStr);
                     iter.set(newAtt);
+                }
+                if (a.getShortName().equals("_NCProperties")) {
+                    iter.remove();
                 }
             }
         } catch (UnsupportedOperationException ex) {
