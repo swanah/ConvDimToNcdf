@@ -165,7 +165,7 @@ public class DataGridder {
 
         double[] lat = getVarAsDoubleArr(ncF, "latitude");
         double[] lon = getVarAsDoubleArr(ncF, "longitude");
-        String[] aodNames = new String[]{"AOD_0550", "AOD_0659", "AOD_0865", "AOD_1610", "AOD_2250"};
+        String[] aodNames = new String[]{"AOD_0550_fltr", "AOD_0659", "AOD_0865", "AOD_1610", "AOD_2250"};
         String[] aodUncNames = new String[]{"AOD_0550_uncertainty", "AOD_0659_uncertainty", "AOD_0865_uncertainty", "AOD_1610_uncertainty", "AOD_2250_uncertainty"};
         String[] sdrNames = new String[]{"S1_SDR_n", "S2_SDR_n", "S3_SDR_n", "S5_SDR_n", "S6_SDR_n"};
         float[][] aod = new float[aodNames.length][];
