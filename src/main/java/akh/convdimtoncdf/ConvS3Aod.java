@@ -36,7 +36,7 @@ public class ConvS3Aod {
             int lv2ConvIdx = 1;
             int firstInputFileIdx = 2;
             S3DataVersionNumbers version = S3DataVersionNumbers.parseVersionString(args[versionIdx]);            
-            lv2Conv = lv2Conv && args[lv2ConvIdx].equalsIgnoreCase("lv2");
+            lv2Conv = args[lv2ConvIdx].equalsIgnoreCase("lv2");
             if (lv2Conv){
                 pSinConvL2.initAsS3Ncdf(args[firstInputFileIdx]);
             }
@@ -55,6 +55,12 @@ public class ConvS3Aod {
                     switch (version){
                         case v1_00:
                         case v1_10:
+                        case v1_11:
+                        case v1_12:
+                        case v1_13:
+                        case v1_20:
+                        case v1_21:
+                        case v1_22:
                             pSinConvL2.convertS3(fname, l2NetcdfName, version);
                             gridder.binNcdfToGridV4(fname, version);
                             break;

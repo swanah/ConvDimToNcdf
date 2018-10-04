@@ -11,7 +11,7 @@ package akh.convdimtoncdf;
  * @author akheckel
  */
 public enum S3DataVersionNumbers {
-    v1_00("1.00"), v1_10("1.10");
+    v1_00("1.00"), v1_10("1.10"), v1_11("1.11"), v1_12("1.12"), v1_13("1.13"), v1_20("1.20"), v1_21("1.21"), v1_22("1.22");
     
     public String versionString;
 
