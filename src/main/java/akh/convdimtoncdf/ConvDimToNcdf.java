@@ -94,6 +94,7 @@ public class ConvDimToNcdf {
                         case v4_21:
                         case v4_3: 
                         case v4_31: 
+                        case v4_32: 
                         case vSyn1_0: 
                         case vSyn1_1: 
                         case vSyn1_2: 
