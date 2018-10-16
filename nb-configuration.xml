@@ -12,6 +12,7 @@ Without this configuration present, some functionality in the IDE may be limited
             <configuration id="L3Gridder" profiles=""/>
             <configuration id="NsGridToGMT" profiles=""/>
             <configuration id="S3 L3 Day" profiles=""/>
+            <configuration id="S3 L3 Month" profiles=""/>
             <configuration id="S3 L3 Orbit" profiles=""/>
             <configuration id="conv 2 NS" profiles=""/>
             <configuration id="dumpNcdf4" profiles=""/>
@@ -19,7 +20,7 @@ Without this configuration present, some functionality in the IDE may be limited
             <configuration id="test 0.48" profiles=""/>
             <configuration id="test 0.52" profiles=""/>
             <configuration id="test 0.53" profiles=""/>
-            <configuration id="S3 L3 Month" profiles=""/>
+            <configuration id="S3 L3 annual" profiles=""/>
         </configurations>
     </config-data>
 </project-shared-configuration>

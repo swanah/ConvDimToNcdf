@@ -84,6 +84,12 @@ public class S3L3GridderMain {
                 l3Acc.normVari2StdErr();
                 outName = String.format("%s/%04d%02d-C3S-L3C_AEROSOL-%s-%s-%s-v%s.nc", outPath.getPath(), year, month, prod, instrument, instTime.replaceFirst("DAILY", "MONTHLY"), version);
                 break;
+            case ANNUAL: 
+                instTime = "SU_MONTHLY";
+                accumulateAnnual(l3Acc);
+                l3Acc.normVari2StdErr();
+                outName = String.format("%s/%04d-C3S-L3C_AEROSOL-%s-%s-%s-v%s.nc", outPath.getPath(), year, prod, instrument, instTime.replaceFirst("MONTHLY", "ANNUAL"), version);
+                break;
             default:
                 throw new IllegalArgumentException("binPeriod undefined");
         }
@@ -127,6 +133,29 @@ public class S3L3GridderMain {
         int mlen = getMaxDays(year, month);
         for (int day=1; day<=mlen; day++){
             fname = String.format("%04d%02d%02d-C3S-L3C_AEROSOL-%s-%s-%s-v%s.nc", year, month, day, prod, instrument, instTime, version);
+            f = new File(inPath, fname);
+            System.out.println(f.getPath()+" "+ f.exists());
+            if (f.exists()) {
+                
+                System.err.println(f.getPath());
+                try {
+                    NetcdfFile ncF = NetcdfFile.open(f.getPath());
+                } catch (IOException ex) {
+                    Logger.getLogger(S3L3GridderMain.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+                }
+                
+                l3Acc.add(f);
+            }
+        }
+    }
+
+    private static void accumulateAnnual(L3Accumulator l3Acc) {
+        l3Acc.setAccumulateCounts(false);
+        l3Acc.setPropL3Unc(true);
+        String fname;
+        File f = null;
+        for (int imon=1; imon<=12; imon++){
+            fname = String.format("%04d%02d-C3S-L3C_AEROSOL-%s-%s-%s-v%s.nc", year, imon, prod, instrument, instTime, version);
             f = new File(inPath, fname);
             System.out.println(f.getPath()+" "+ f.exists());
             if (f.exists()) {

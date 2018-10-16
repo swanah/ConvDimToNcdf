@@ -5,7 +5,7 @@
     <groupId>akh</groupId>
     <artifactId>convDimToNcdf</artifactId>
     <packaging>jar</packaging>
-    <version>0.611</version>
+    <version>0.62</version>
     <name>convDimToNcdf</name>
     <url>http://maven.apache.org</url>
 
@@ -138,5 +138,7 @@
         v0.59 : implement Schutgens Aerocom ncdf format
         v0.60 : implement S3 AOD
         v0.61 : include CCI bridging v43a - AOD constraint 1
-        v0.611 : AOD_0550_fltr</description>
+        v0.611 : AOD_0550_fltr
+        v0.62 : added annual
+</description>
 </project>
