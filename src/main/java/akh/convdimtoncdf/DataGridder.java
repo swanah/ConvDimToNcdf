@@ -58,6 +58,7 @@ public class DataGridder {
     private boolean doSyn;
     private boolean doSurfRefl;
     private int aodVersionId;
+    private boolean doRecomputeAAOD;
     
     public DataGridder() throws Exception {
         this(false);
@@ -240,6 +241,7 @@ public class DataGridder {
 
     public void binToGridV4(Product p, DataVersionNumbers version){
         aodVersionId = (version.equals(DataVersionNumbers.v4_31)) ? 3 : 1;
+        doRecomputeAAOD = (version.equals(DataVersionNumbers.v4_32));
         doSurfRefl = p.containsBand(String.format("reflec_surf_nadir_0550_%d", aodVersionId));
         doSyn = version.isGE(DataVersionNumbers.vSyn1_0);
         String fname = p.getFileLocation().getPath();
@@ -391,6 +393,16 @@ public class DataGridder {
 
                 absAotB.readPixels(0, iy, pWidth, 1, absAot);
                 ssaB.readPixels(0, iy, pWidth, 1, ssa);
+                if (doRecomputeAAOD) {
+                    for (int ii=0; ii<absAot.length; ii++){
+                        if (aotNd[ii] > 0 && ssa[ii] > 0) {
+                            absAot[ii] = (1 - ssa[ii]) * aotNd[ii]; 
+                        }
+                        else {
+                            absAot[ii] = (float) absAotB.getGeophysicalNoDataValue(); 
+                        }
+                    }
+                }
 
                 if (doSurfRefl){
                     sref0555B.readPixels(0, iy, pWidth, 1, sref0550);

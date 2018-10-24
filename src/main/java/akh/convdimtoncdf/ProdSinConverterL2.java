@@ -154,6 +154,7 @@ class ProdSinConverterL2 extends BasicConverter {
         cldFracV.varName,
         landFlagV.varName
     };
+    private boolean doRecomputeAAOD;
 
     private ProdSinConverterL2() throws IOException {
         modelInfo = readAerosolModelInfo("ccimodel.info");
@@ -182,6 +183,7 @@ class ProdSinConverterL2 extends BasicConverter {
         System.out.println("processing V" + version + " - " + fname);
         sinP = new SinProduct(sinBandNames, p);
         aodVersionId = (version.equals(DataVersionNumbers.v4_31)) ? 3 : 1;
+        doRecomputeAAOD = (version.equals(DataVersionNumbers.v4_32));
         doSyn = version.isGE(DataVersionNumbers.vSyn1_0);
         doSurfRefl = p.containsBand(String.format("reflec_surf_nadir_0550_%d", aodVersionId));
         binProductToSin(p, sinP);
@@ -652,6 +654,17 @@ class ProdSinConverterL2 extends BasicConverter {
                 
                 absAotB.readPixels(0, iy, pWidth, 1, absAot);
                 ssaB.readPixels(0, iy, pWidth, 1, ssa);
+                
+                if (doRecomputeAAOD) {
+                    for (int ii=0; ii<absAot.length; ii++){
+                        if (aotNd[ii] > 0 && ssa[ii] > 0) {
+                            absAot[ii] = (1 - ssa[ii]) * aotNd[ii]; 
+                        }
+                        else {
+                            absAot[ii] = (float) absAotB.getGeophysicalNoDataValue(); 
+                        }
+                    }
+                }
 
                 //sAot0550B.readPixels(0, iy, pWidth, 1, sAot0555);
                 sAot0670B.readPixels(0, iy, pWidth, 1, sAot0659);
