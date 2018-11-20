@@ -183,7 +183,7 @@ class ProdSinConverterL2 extends BasicConverter {
         System.out.println("processing V" + version + " - " + fname);
         sinP = new SinProduct(sinBandNames, p);
         aodVersionId = (version.equals(DataVersionNumbers.v4_31)) ? 3 : 1;
-        doRecomputeAAOD = (version.equals(DataVersionNumbers.v4_32));
+        doRecomputeAAOD = false; //(version.equals(DataVersionNumbers.v4_32));
         doSyn = version.isGE(DataVersionNumbers.vSyn1_0);
         doSurfRefl = p.containsBand(String.format("reflec_surf_nadir_0550_%d", aodVersionId));
         binProductToSin(p, sinP);
