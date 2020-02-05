@@ -1,1 +1,8 @@
-/nbactions-conv 2 NS.xml
+/target/
+/nbproject/
+/*.par
+**/*.bak
+**/*~
+/nb-conf*
+/nbaction*
+/*.bash
