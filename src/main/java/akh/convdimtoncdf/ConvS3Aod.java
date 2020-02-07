@@ -91,7 +91,7 @@ public class ConvS3Aod {
         else {
             System.err.println("Require cmd line args: versionString files.dim");
             System.err.print("    versionString can be one of [");
-            for (DataVersionNumbers v : DataVersionNumbers.values()) System.err.print(v+", ");
+            for (S3DataVersionNumbers v : S3DataVersionNumbers.values()) System.err.print(v+", ");
             System.err.printf("\b\b]\n");
         }
     }
