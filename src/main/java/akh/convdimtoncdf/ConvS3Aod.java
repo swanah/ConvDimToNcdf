@@ -20,6 +20,8 @@ import ucar.nc2.NetcdfFile;
  */
 public class ConvS3Aod {
 
+    static String instrument = "SLSTR_SENTINEL_S3A";
+
     /**
      * @param args the command line arguments
      */
@@ -104,7 +106,7 @@ public class ConvS3Aod {
         String yyyymmdd = stmp.substring(16, 16+8);
         String hhmmss = stmp.substring(16+8+1, 16+8+1+6);
         String orbit = getVersionNcdf(fname);
-        String instrument = "SLSTR_Sentinel_S3A";
+        //String instrument = "SLSTR_Sentinel_S3A";
         String l2NetcdfName = yyyymmdd + hhmmss + "-C3S-L2P_AEROSOL-AER_PRODUCTS-" + instrument + "-SU_" + orbit + "-v" + version + ".nc";
         f = new File(f.getParentFile(), l2NetcdfName);
         l2NetcdfName = f.getPath();
@@ -119,7 +121,7 @@ public class ConvS3Aod {
         String stmp = f.getName();
         String yyyymmdd = stmp.substring(16, 16+8);
         String hhmmss = stmp.substring(16+8+1, 16+8+1+6);
-        String instrument = "SLSTR_SENTINEL_S3A";
+        //String instrument = "SLSTR_SENTINEL_S3A";
         String l3NetcdfName = yyyymmdd;
         if (lv3SingleOrbit) l3NetcdfName += hhmmss;
         l3NetcdfName += "-C3S-L3C_AEROSOL-AER_PRODUCTS-" + instrument + "-SU_DAILY-v" + version + ".nc";
